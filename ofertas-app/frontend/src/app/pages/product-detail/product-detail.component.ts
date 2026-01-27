@@ -23,11 +23,11 @@ export class ProductDetailComponent implements OnInit {
     this.route.params.subscribe(params => {
       const id = params['id'];
       if (id) {
-        this.productsService.getProductDetails(id).subscribe(
-          product => {
+        this.productsService.getProductById(id).subscribe(
+          (product: Product) => {
             this.product = product;
           },
-          error => {
+          (error: any) => {
             console.error('Error loading product:', error);
           }
         );

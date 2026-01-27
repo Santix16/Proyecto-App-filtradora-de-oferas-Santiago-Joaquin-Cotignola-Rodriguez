@@ -17,8 +17,6 @@ export class ResultsComponent implements OnInit {
   constructor(private productsService: ProductsService) {}
 
   ngOnInit(): void {
-    this.productsService.products$.subscribe(products => {
-      this.products = products;
-    });
+    this.productsService.loading$.subscribe();
   }
 }

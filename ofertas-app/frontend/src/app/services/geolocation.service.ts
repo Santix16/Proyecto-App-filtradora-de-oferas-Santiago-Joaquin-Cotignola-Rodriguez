@@ -166,8 +166,3 @@ export class GeolocationService {
     }
   }
 }
-
-  getLastLocation(): Observable<{ latitude: number; longitude: number } | null> {
-    return this.location$;
-  }
-}
