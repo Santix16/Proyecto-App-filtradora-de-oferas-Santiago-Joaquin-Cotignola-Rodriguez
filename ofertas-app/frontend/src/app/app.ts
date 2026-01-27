@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -10,6 +10,6 @@ import { CommonModule } from '@angular/common';
   styleUrl: './app.css'
 })
 export class AppComponent {
-  title = 'Ofertas App - MVP';
+  title = signal('Ofertas App - MVP');
   year = new Date().getFullYear();
 }
