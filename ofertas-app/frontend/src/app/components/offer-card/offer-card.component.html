@@ -1,0 +1,18 @@
+<div class="offer-card" *ngIf="product">
+  <div class="card-image">
+    <img [src]="product.image" [alt]="product.name" />
+    <div *ngIf="discountPercentage > 0" class="discount-badge">
+      -{{ discountPercentage }}%
+    </div>
+  </div>
+  <div class="card-content">
+    <h3>{{ product.name }}</h3>
+    <p class="store-name">{{ product.storeName }}</p>
+    <p class="description">{{ product.description }}</p>
+    <div class="price-section">
+      <span *ngIf="product.originalPrice" class="original-price">{{ product.originalPrice | currency }}</span>
+      <span class="current-price">{{ product.price | currency }}</span>
+    </div>
+    <button class="view-button">Ver Oferta</button>
+  </div>
+</div>

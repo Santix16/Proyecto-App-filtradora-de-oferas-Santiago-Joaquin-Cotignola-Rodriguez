@@ -1,0 +1,38 @@
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.hero {
+  text-align: center;
+  padding: 40px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.hero p {
+  margin: 10px 0 0 0;
+  font-size: 18px;
+}
+
+.search-section {
+  margin-bottom: 40px;
+}
+
+.map-section {
+  margin-top: 40px;
+}
+
+.map-section h2 {
+  margin-bottom: 20px;
+  font-size: 24px;
+}

@@ -1,0 +1,11 @@
+<div class="store-list">
+  <div class="store-item" *ngFor="let store of stores">
+    <div class="store-header">
+      <h3>{{ store.name }}</h3>
+      <span class="rating" *ngIf="store.rating">★ {{ store.rating }}</span>
+    </div>
+    <p class="address">{{ store.address }}, {{ store.city }}</p>
+    <p class="contact">📞 {{ store.phone }}</p>
+    <button class="view-button">Ver Tienda</button>
+  </div>
+</div>
