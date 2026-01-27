@@ -14,12 +14,6 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
-# Build artifacts
-dist/
-build/
-out-tsc/
-.angular/cache/
-
 # IDE
 .vscode/
 .idea/
@@ -30,8 +24,3 @@ out-tsc/
 # OS
 .DS_Store
 Thumbs.db
-
-# Testing
-coverage/
-/testem.log
-__screenshots__/
