@@ -4,7 +4,7 @@ import { ResultsComponent } from './pages/results/results.component';
 import { ProductDetailComponent } from './pages/product-detail/product-detail.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
+  { path: 'home', component: HomeComponent },
   { path: 'results', component: ResultsComponent },
   { path: 'product/:id', component: ProductDetailComponent },
   { path: '**', redirectTo: '' }
