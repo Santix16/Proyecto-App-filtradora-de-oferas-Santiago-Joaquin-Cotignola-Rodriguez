@@ -9,7 +9,7 @@ import { Store } from '../models/store.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000'; // ← SIN /api
 
   constructor(private http: HttpClient) { }
 
@@ -30,6 +30,11 @@ export class ApiService {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
 
+  // Búsqueda de productos (nuevo método)
+  searchProducts(query: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?q=${query}`);
+  }
+
   // Ofertas
   getOffers(params?: any): Observable<Offer[]> {
     let httpParams = new HttpParams();
@@ -43,6 +48,10 @@ export class ApiService {
     return this.http.get<Offer[]>(`${this.apiUrl}/offers`, { params: httpParams });
   }
 
+  getOfferById(id: string): Observable<Offer> {
+    return this.http.get<Offer>(`${this.apiUrl}/offers/${id}`);
+  }
+
   // Tiendas
   getStores(): Observable<Store[]> {
     return this.http.get<Store[]>(`${this.apiUrl}/stores`);
@@ -50,5 +59,37 @@ export class ApiService {
 
   getStoreById(id: string): Observable<Store> {
     return this.http.get<Store>(`${this.apiUrl}/stores/${id}`);
+  }
+
+  // Categorías
+  getCategories(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/categories`);
+  }
+
+  // Métodos adicionales útiles
+
+  // Filtrar productos por categoría
+  getProductsByCategory(category: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?category=${category}`);
+  }
+
+  // Filtrar productos por tienda
+  getProductsByStore(storeId: string): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?storeId=${storeId}`);
+  }
+
+  // Filtrar productos con descuento
+  getProductsWithDiscount(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?discount_gte=1`);
+  }
+
+  // Ordenar productos por precio
+  getProductsSortedByPrice(order: 'asc' | 'desc' = 'asc'): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?_sort=price&_order=${order}`);
+  }
+
+  // Obtener productos con paginación
+  getProductsPaginated(page: number = 1, limit: number = 10): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/products?_page=${page}&_limit=${limit}`);
   }
 }
