@@ -1,14 +1,30 @@
 <div class="results-container">
-  <h1>Resultados de Búsqueda</h1>
-  
-  <div class="products-grid">
-    <app-offer-card 
-      *ngFor="let product of products" 
-      [product]="product">
+  <div class="results-header">
+    <h1>Ofertas en {{ subcategory }}</h1>
+    <p *ngIf="offersWithDetails.length > 0">{{ offersWithDetails.length }} ofertas encontradas</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Buscando ofertas...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Offers Grid -->
+  <div *ngIf="!loading && !error" class="offers-grid">
+    <app-offer-card
+      *ngFor="let offerDetails of offersWithDetails"
+      [offerDetails]="offerDetails">
     </app-offer-card>
   </div>
-  
-  <div *ngIf="products.length === 0" class="no-results">
-    <p>No se encontraron resultados</p>
+
+  <!-- No results -->
+  <div *ngIf="!loading && !error && offersWithDetails.length === 0" class="no-results">
+    <p>No se encontraron ofertas en esta categoría</p>
+    <p>Intenta con otra categoría o verifica que hay productos disponibles.</p>
   </div>
 </div>

@@ -9,7 +9,7 @@ import { Store } from '../models/store.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000'; // ← SIN /api
+  private apiUrl = 'http://localhost:3000'; // ← Cambiado a puerto 3000
 
   constructor(private http: HttpClient) { }
 

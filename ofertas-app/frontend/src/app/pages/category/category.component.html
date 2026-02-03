@@ -1,0 +1,62 @@
+<div class="category-container">
+  <!-- Header -->
+  <div class="category-header">
+    <button class="back-button" (click)="goBack()">← Volver</button>
+    <div class="category-title">
+      <span class="category-emoji">{{ getCategoryEmoji(categoryName) }}</span>
+      <h1>{{ categoryName }}</h1>
+    </div>
+    <p class="category-subtitle">Selecciona un producto para ver sus ofertas</p>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Cargando productos...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Products Grid -->
+  <div *ngIf="!loading && !error" class="products-section">
+    <div class="products-grid" *ngIf="products.length > 0">
+      <div class="product-card" *ngFor="let product of products" (click)="onProductClick(product)">
+        <div class="product-image">
+          <img [src]="product.image" [alt]="product.name" />
+          <div *ngIf="product.discount && product.discount > 0" class="discount-badge">
+            -{{ product.discount }}%
+          </div>
+        </div>
+
+        <div class="product-info">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <p class="product-store">📍 {{ product.storeName }}</p>
+
+          <div class="product-rating">
+            <span class="stars">⭐ {{ product.rating }}/5</span>
+            <span class="reviews">({{ product.reviews }} reseñas)</span>
+          </div>
+
+          <div class="product-price">
+            <span *ngIf="product.originalPrice && product.discount && product.discount > 0" class="original-price">
+              €{{ product.originalPrice }}
+            </span>
+            <span class="current-price">€{{ product.price }}</span>
+          </div>
+
+          <div class="product-stock" [class.out-of-stock]="!product.inStock">
+            {{ product.inStock ? '✓ En stock' : '✗ Sin stock' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No products -->
+    <div *ngIf="products.length === 0" class="no-products">
+      <p>No se encontraron productos en esta categoría</p>
+      <p>Intenta con otra categoría.</p>
+    </div>
+  </div>
+</div>

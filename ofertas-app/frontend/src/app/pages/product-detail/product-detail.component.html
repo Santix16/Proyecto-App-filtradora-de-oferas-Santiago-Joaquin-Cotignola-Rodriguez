@@ -1,34 +1,85 @@
-<div class="product-detail-container" *ngIf="product">
+<div class="product-detail-container" *ngIf="product && !loading">
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Cargando detalles del producto...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <!-- Product Image -->
   <div class="product-image">
     <img [src]="product.image" [alt]="product.name" />
-    <div *ngIf="discountPercentage > 0" class="discount-badge">
-      -{{ discountPercentage }}%
+    <div *ngIf="offer" class="offer-badge">
+      ¡OFERTA! -{{ offerDiscountPercentage }}%
     </div>
   </div>
-  
+
+  <!-- Product Info -->
   <div class="product-info">
     <h1>{{ product.name }}</h1>
-    <p class="store-info">{{ product.storeName }}</p>
-    <p class="category">Categoría: {{ product.category }}</p>
-    
-    <div class="price-info">
-      <span *ngIf="product.originalPrice" class="original-price">{{ product.originalPrice | currency }}</span>
-      <span class="current-price">{{ product.price | currency }}</span>
+
+    <!-- Store Info -->
+    <div class="store-section" *ngIf="store">
+      <h3>📍 Disponible en:</h3>
+      <div class="store-details">
+        <p class="store-name">{{ store.name }}</p>
+        <p class="store-address">{{ store.address }}, {{ store.city }}</p>
+        <p class="store-phone">📞 {{ store.phone }}</p>
+        <div class="store-rating">
+          <span>⭐ {{ store.rating }}/5</span>
+          <span>({{ store.reviews }} reseñas)</span>
+        </div>
+      </div>
     </div>
-    
+
+    <p class="category">📂 Categoría: {{ product.category }}</p>
+
+    <!-- Price Info -->
+    <div class="price-info">
+      <div *ngIf="offer" class="offer-price">
+        <span class="original-price">€{{ offerOriginalPrice }}</span>
+        <span class="current-price">€{{ offerFinalPrice }}</span>
+        <div class="savings">
+          ¡Ahorras €{{ offerOriginalPrice - offerFinalPrice }}!
+        </div>
+      </div>
+      <div *ngIf="!offer" class="regular-price">
+        <span class="current-price">€{{ product.price }}</span>
+      </div>
+    </div>
+
+    <!-- Offer Details -->
+    <div *ngIf="offer" class="offer-details">
+      <h3>🔥 Detalles de la Oferta</h3>
+      <p class="offer-description">{{ offer.description }}</p>
+      <div class="offer-dates">
+        <p>📅 Válida desde: {{ offer.startDate | date:'dd/MM/yyyy' }}</p>
+        <p>⏰ Hasta: {{ offer.endDate | date:'dd/MM/yyyy' }}</p>
+      </div>
+    </div>
+
     <p class="description">{{ product.description }}</p>
-    
+
     <div class="availability">
       <span *ngIf="product.inStock" class="in-stock">✓ En Stock</span>
       <span *ngIf="!product.inStock" class="out-of-stock">✗ Sin Stock</span>
     </div>
-    
+
+    <!-- Product Rating -->
+    <div *ngIf="product.rating" class="rating">
+      <span class="stars">⭐ {{ product.rating }}/5</span>
+      <span class="reviews">({{ product.reviews }} reseñas)</span>
+    </div>
+
     <button [disabled]="!product.inStock" class="add-to-cart-button">
       Agregar al Carrito
     </button>
   </div>
 </div>
 
-<div *ngIf="!product" class="no-product">
+<div *ngIf="!product && !loading" class="no-product">
   <p>Producto no encontrado</p>
 </div>

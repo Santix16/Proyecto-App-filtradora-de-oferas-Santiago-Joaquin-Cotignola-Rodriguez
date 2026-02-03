@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Store } from '../../models/store.model';
 
 @Component({
   selector: 'app-map-view',
@@ -9,5 +10,7 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./map-view.component.css']
 })
 export class MapViewComponent {
+  @Input() stores: Store[] = [];
+  
   // Aquí iría la lógica del mapa (Google Maps, Leaflet, etc.)
 }

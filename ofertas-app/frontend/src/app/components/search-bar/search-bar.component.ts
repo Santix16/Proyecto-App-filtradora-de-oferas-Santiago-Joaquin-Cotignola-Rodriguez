@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -10,12 +10,17 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./search-bar.component.css']
 })
 export class SearchBarComponent {
-  searchQuery: string = '';
+  @Output() search = new EventEmitter<string>();
+  searchQuery = '';
 
-  onSearch(): void {
-    if (this.searchQuery.trim()) {
-      console.log('Searching for:', this.searchQuery);
-      // Aquí irá la lógica de búsqueda
+  onSearch() {
+    this.search.emit(this.searchQuery);
+  }
+
+  onInputChange() {
+    // Búsqueda en tiempo real (opcional)
+    if (this.searchQuery.length >= 2 || this.searchQuery.length === 0) {
+      this.search.emit(this.searchQuery);
     }
   }
 }

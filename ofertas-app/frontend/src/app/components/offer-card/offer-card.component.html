@@ -1,18 +1,23 @@
-<div class="offer-card" *ngIf="product">
+<div class="offer-card" *ngIf="offerDetails" (click)="onCardClick()">
   <div class="card-image">
-    <img [src]="product.image" [alt]="product.name" />
-    <div *ngIf="discountPercentage > 0" class="discount-badge">
+    <img [src]="offerDetails.product.image" [alt]="offerDetails.product.name" />
+    <div class="discount-badge">
       -{{ discountPercentage }}%
     </div>
   </div>
   <div class="card-content">
-    <h3>{{ product.name }}</h3>
-    <p class="store-name">{{ product.storeName }}</p>
-    <p class="description">{{ product.description }}</p>
+    <h3>{{ offerDetails.product.name }}</h3>
+    <p class="store-name">📍 {{ offerDetails.store.name }}</p>
+    <p class="description">{{ offerDetails.product.description }}</p>
     <div class="price-section">
-      <span *ngIf="product.originalPrice" class="original-price">{{ product.originalPrice | currency }}</span>
-      <span class="current-price">{{ product.price | currency }}</span>
+      <span class="original-price">€{{ originalPrice }}</span>
+      <span class="current-price">€{{ finalPrice }}</span>
     </div>
-    <button class="view-button">Ver Oferta</button>
+    <div class="offer-info">
+      <span class="offer-description">{{ offerDetails.offer.description }}</span>
+    </div>
+    <div class="location-info">
+      <span class="location">📍 {{ offerDetails.store.address }}, {{ offerDetails.store.city }}</span>
+    </div>
   </div>
 </div>

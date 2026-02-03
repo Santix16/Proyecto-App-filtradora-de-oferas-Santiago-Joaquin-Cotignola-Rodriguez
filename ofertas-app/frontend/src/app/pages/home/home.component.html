@@ -1,15 +1,52 @@
 <div class="home-container">
-  <div class="hero">
-    <h1>Encuentra las Mejores Ofertas</h1>
-    <p>Descubre los descuentos más increíbles en tiendas cerca de ti</p>
+  <!-- Título de la app -->
+  <header class="app-header">
+    <h1 class="app-title">🛒 Ofertas App</h1>
+    <p class="app-subtitle">Encuentra las mejores ofertas en productos cerca de ti</p>
+  </header>
+
+  <!-- Barra de búsqueda -->
+  <app-search-bar (search)="onSearch($event)"></app-search-bar>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
   </div>
-  
-  <div class="search-section">
-    <app-search-bar></app-search-bar>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Cargando datos...</p>
   </div>
-  
-  <div class="map-section">
-    <h2>Tiendas Cercanas</h2>
-    <app-map-view></app-map-view>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!loading" class="main-content">
+
+    <!-- Subcategorías -->
+    <section class="section">
+      <div class="section-header">
+        <h2>🛒 Subcategorías de Productos</h2>
+        <p>Selecciona una subcategoría para ver todas las ofertas disponibles</p>
+      </div>
+
+      <div class="categories-grid" *ngIf="categories.length > 0">
+        <div class="category-card" *ngFor="let category of categories" (click)="onCategoryClick(category)">
+          <div class="category-icon">
+            <span class="category-emoji">{{ getCategoryEmoji(category) }}</span>
+          </div>
+          <h3 class="category-name">{{ category }}</h3>
+          <p class="category-description">{{ getCategoryDescription(category) }}</p>
+          <div class="category-count">
+            {{ getOffersCountForCategory(category) }} ofertas
+          </div>
+        </div>
+      </div>
+
+      <!-- Mensaje si no hay categorías -->
+      <div *ngIf="categories.length === 0" class="no-results">
+        <p>No se encontraron categorías</p>
+      </div>
+    </section>
   </div>
 </div>
+```
+

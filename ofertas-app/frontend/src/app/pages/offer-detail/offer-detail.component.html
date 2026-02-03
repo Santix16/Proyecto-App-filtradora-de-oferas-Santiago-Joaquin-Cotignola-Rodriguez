@@ -1,0 +1,151 @@
+<div class="offer-detail-container" *ngIf="offer && product && store && !loading">
+  <!-- Header -->
+  <div class="offer-header">
+    <button class="back-button" (click)="goBack()">← Volver</button>
+    <div class="offer-status" [class.active]="isOfferActive()" [class.inactive]="!isOfferActive()">
+      {{ isOfferActive() ? '🔥 OFERTA ACTIVA' : '⏰ OFERTA EXPIRADA' }}
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="offer-content">
+    <!-- Product Section -->
+    <div class="product-section">
+      <div class="product-image">
+        <img [src]="product.image" [alt]="product.name" />
+        <div class="discount-overlay">
+          <span class="discount-text">-{{ getDiscountPercentage() }}%</span>
+        </div>
+      </div>
+
+      <div class="product-info">
+        <h1>{{ product.name }}</h1>
+        <p class="product-description">{{ product.description }}</p>
+
+        <div class="product-meta">
+          <span class="category">📂 {{ product.category }}</span>
+          <span class="rating">⭐ {{ product.rating }}/5 ({{ product.reviews }} reseñas)</span>
+          <span class="stock" [class.in-stock]="product.inStock" [class.out-of-stock]="!product.inStock">
+            {{ product.inStock ? '✓ En stock' : '✗ Sin stock' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Offer Section -->
+    <div class="offer-section">
+      <h2>Detalles de la Oferta</h2>
+
+      <div class="offer-card">
+        <div class="offer-description">
+          <h3>{{ offer.description }}</h3>
+        </div>
+
+        <div class="price-comparison">
+          <div class="price-item">
+            <span class="price-label">Precio original</span>
+            <span class="original-price">€{{ offer.originalPrice }}</span>
+          </div>
+          <div class="price-arrow">→</div>
+          <div class="price-item">
+            <span class="price-label">Precio con oferta</span>
+            <span class="final-price">€{{ offer.finalPrice }}</span>
+          </div>
+        </div>
+
+        <div class="savings-highlight">
+          <span class="savings-text">¡Ahorras €{{ getSavings() }}!</span>
+        </div>
+
+        <div class="offer-dates">
+          <div class="date-item">
+            <span class="date-label">Fecha de inicio:</span>
+            <span class="date-value">{{ offer.startDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <div class="date-item">
+            <span class="date-label">Fecha de fin:</span>
+            <span class="date-value">{{ offer.endDate | date:'dd/MM/yyyy' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Store Section -->
+    <div class="store-section">
+      <h2>Ubicación de la Tienda</h2>
+
+      <div class="store-card">
+        <div class="store-header">
+          <h3>{{ store.name }}</h3>
+          <div class="store-rating">
+            <span>⭐ {{ store.rating }}/5</span>
+            <span>({{ store.reviews }} reseñas)</span>
+          </div>
+        </div>
+
+        <div class="store-details">
+          <div class="store-info">
+            <p class="store-address">
+              <strong>📍 Dirección:</strong><br>
+              {{ store.address }}<br>
+              {{ store.city }}, {{ store.state }} {{ store.zipCode }}
+            </p>
+
+            <p class="store-phone">
+              <strong>📞 Teléfono:</strong><br>
+              {{ store.phone }}
+            </p>
+
+            <p class="store-email" *ngIf="store.email">
+              <strong>✉️ Email:</strong><br>
+              {{ store.email }}
+            </p>
+
+            <p class="store-website" *ngIf="store.website">
+              <strong>🌐 Sitio web:</strong><br>
+              <a [href]="store.website" target="_blank">{{ store.website }}</a>
+            </p>
+          </div>
+
+          <div class="store-location">
+            <div class="location-coords">
+              <p><strong>Coordenadas GPS:</strong></p>
+              <p>Latitud: {{ store.location.latitude }}</p>
+              <p>Longitud: {{ store.location.longitude }}</p>
+            </div>
+
+            <div class="map-placeholder">
+              <div class="map-icon">🗺️</div>
+              <p>Mapa interactivo próximamente</p>
+              <p class="coords-link">
+                <a [href]="'https://www.google.com/maps?q=' + store.location.latitude + ',' + store.location.longitude" target="_blank">
+                  Ver en Google Maps ↗
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="store-hours" *ngIf="store.openingHours">
+          <h4>Horario de apertura</h4>
+          <div class="hours-grid">
+            <div class="hour-item" *ngFor="let day of getDaysOfWeek()">
+              <span class="day">{{ day }}:</span>
+              <span class="hours">{{ getOpeningHours(day.toLowerCase()) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading">
+    <p>Cargando detalles de la oferta...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+</div>

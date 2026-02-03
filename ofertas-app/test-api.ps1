@@ -4,7 +4,7 @@
 Write-Host "🧪 Iniciando pruebas de API..." -ForegroundColor Cyan
 Write-Host ""
 
-$apiUrl = "http://localhost:3000/api"
+$apiUrl = "http://localhost:3000"
 
 function Test-Endpoint {
     param(
