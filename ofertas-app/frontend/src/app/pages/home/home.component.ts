@@ -39,7 +39,7 @@ export class HomeComponent implements OnInit {
 
   loadAllData() {
     this.loading = true;
-    
+
     // Cargar productos para contar ofertas por categoría
     this.apiService.getProducts().subscribe({
       next: (data: Product[]) => {
@@ -91,19 +91,19 @@ export class HomeComponent implements OnInit {
       'Leche': ['leche', 'lácteos'],
       'Yogur': ['yogur', 'yogurt'],
       'Queso': ['queso'],
-      
+
       // Panadería
       'Pan': ['pan', 'barra', 'baguette', 'baguete'],
-      
+
       // Carnes
       'Pollo': ['pollo', 'pechuga'],
       'Ternera': ['ternera', 'carne picada'],
-      
+
       // Frutas y Verduras
       'Naranja': ['naranja'],
       'Tomate': ['tomate'],
       'Plátano': ['plátano', 'banana'],
-      
+
       // Bebidas
       'Agua': ['agua'],
       'Refresco': ['coca', 'cola', 'refresco'],
@@ -114,7 +114,7 @@ export class HomeComponent implements OnInit {
 
     products.forEach(product => {
       const name = product.name.toLowerCase();
-      
+
       for (const [subcategory, keywords] of Object.entries(subcategoryMap)) {
         if (keywords.some((keyword: string) => name.includes(keyword))) {
           subcategories.add(subcategory);
@@ -182,8 +182,13 @@ export class HomeComponent implements OnInit {
 
   // Método para contar ofertas por categoría
   getOffersCountForCategory(category: string): number {
-    // Filtrar productos de esta categoría
-    const productsInCategory = this.products.filter(p => p.category === category);
+    // Filtrar productos de esta categoría (normalizar por si hay problemas de encoding)
+    const productsInCategory = this.products.filter(p => {
+      // Comparar normalizando espacios y caracteres especiales
+      const productCat = (p.category || '').trim();
+      const searchCat = (category || '').trim();
+      return productCat.toLowerCase() === searchCat.toLowerCase();
+    });
     const productIds = productsInCategory.map(p => p.id);
     return this.offers.filter(o => productIds.includes(o.productId) && o.isActive).length;
   }

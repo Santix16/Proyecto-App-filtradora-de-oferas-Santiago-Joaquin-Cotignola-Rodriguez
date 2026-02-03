@@ -18,9 +18,9 @@ export class CategoryComponent implements OnInit {
   error = '';
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private apiService: ApiService
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly apiService: ApiService
   ) {}
 
   ngOnInit(): void {
@@ -36,9 +36,16 @@ export class CategoryComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    this.apiService.getProductsByCategory(category).subscribe({
-      next: (products: Product[]) => {
-        this.products = products;
+    // Cargar todos los productos y filtrar por categoría local
+    this.apiService.getProducts().subscribe({
+      next: (allProducts: Product[]) => {
+        // Filtrar productos por la categoría recibida (case-insensitive)
+        this.products = allProducts.filter(p => {
+          const productCat = (p.category || '').trim().toLowerCase();
+          const searchCat = (category || '').trim().toLowerCase();
+          return productCat === searchCat;
+        });
+        console.log(`📂 Productos en ${category}:`, this.products.length);
         this.loading = false;
       },
       error: (error: any) => {

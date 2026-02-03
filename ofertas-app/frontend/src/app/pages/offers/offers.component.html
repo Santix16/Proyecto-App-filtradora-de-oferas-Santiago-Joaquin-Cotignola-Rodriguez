@@ -13,7 +13,7 @@
         </div>
       </div>
     </div>
-    <p class="offers-count">{{ offersWithStores.length }} ofertas disponibles</p>
+    <p class="offers-count">{{ totalOffersCount }} ofertas disponibles</p>
   </div>
 
   <!-- Loading -->
@@ -28,50 +28,55 @@
 
   <!-- Offers List -->
   <div *ngIf="!loading && !error" class="offers-section">
-    <div class="offers-list" *ngIf="offersWithStores.length > 0">
-      <div class="offer-card" *ngFor="let offerStore of offersWithStores" (click)="onOfferClick(offerStore.offer)">
-        <div class="offer-header">
-          <div class="store-info">
-            <h3>{{ offerStore.store.name }}</h3>
-            <p class="store-address">📍 {{ offerStore.store.address }}, {{ offerStore.store.city }}</p>
-            <div class="store-rating">
-              <span>⭐ {{ offerStore.store.rating }}/5</span>
-              <span>({{ offerStore.store.reviews }} reseñas)</span>
-            </div>
-          </div>
-          <div class="discount-badge">
-            -{{ offerStore.offer.discount }}%
+    <div class="offers-list" *ngIf="offersByStore.length > 0">
+      <div class="store-group" *ngFor="let group of offersByStore">
+        <div class="store-header">
+          <h2>{{ group.store.name }}</h2>
+          <p class="store-address">📍 {{ group.store.address }}, {{ group.store.city }}</p>
+          <div class="store-rating">
+            <span>⭐ {{ group.store.rating }}/5</span>
+            <span>({{ group.store.reviews }} reseñas)</span>
           </div>
         </div>
 
-        <div class="offer-details">
-          <p class="offer-description">{{ offerStore.offer.description }}</p>
-
-          <div class="price-section">
-            <div class="prices">
-              <span class="original-price">€{{ offerStore.offer.originalPrice }}</span>
-              <span class="final-price">€{{ offerStore.offer.finalPrice }}</span>
+        <div class="store-offers">
+          <button class="offer-card" *ngFor="let offer of group.offers" (click)="onOfferClick(offer)" type="button" (keydown.enter)="onOfferClick(offer)">
+            <div class="offer-header">
+              <div class="store-info">
+                <div class="discount-badge">-{{ offer.discount }}%</div>
+              </div>
             </div>
-            <div class="savings">
-              ¡Ahorras €{{ getSavings(offerStore.offer) }}!
+
+            <div class="offer-details">
+              <p class="offer-description">{{ offer.description }}</p>
+
+              <div class="price-section">
+                <div class="prices">
+                  <span class="original-price">€{{ offer.originalPrice }}</span>
+                  <span class="final-price">€{{ offer.finalPrice }}</span>
+                </div>
+                <div class="savings">
+                  ¡Ahorras €{{ getSavings(offer) }}!
+                </div>
+              </div>
+
+              <div class="offer-dates">
+                <span class="date-range">
+                  📅 Válida del {{ offer.startDate | date:'dd/MM/yyyy' }} al {{ offer.endDate | date:'dd/MM/yyyy' }}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <div class="offer-dates">
-            <span class="date-range">
-              📅 Válida del {{ offerStore.offer.startDate | date:'dd/MM/yyyy' }} al {{ offerStore.offer.endDate | date:'dd/MM/yyyy' }}
-            </span>
-          </div>
-        </div>
-
-        <div class="offer-actions">
-          <button class="view-details-button">Ver Detalles y Ubicación</button>
+            <div class="offer-actions">
+              <span class="view-details-button">Ver Detalles y Ubicación</span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
 
     <!-- No offers -->
-    <div *ngIf="offersWithStores.length === 0" class="no-offers">
+    <div *ngIf="totalOffersCount === 0" class="no-offers">
       <p>No hay ofertas disponibles para este producto</p>
       <p>Intenta con otro producto o vuelve más tarde.</p>
     </div>

@@ -9,9 +9,9 @@ import { Store } from '../models/store.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000'; // ← Cambiado a puerto 3000
+  private readonly apiUrl = 'http://localhost:3000'; // json-server sirve db.json en el puerto 3000
 
-  constructor(private http: HttpClient) { }
+  constructor(private readonly http: HttpClient) { }
 
   // Productos
   getProducts(params?: any): Observable<Product[]> {
