@@ -9,7 +9,7 @@ import { Store } from '../models/store.model';
   providedIn: 'root'
 })
 export class ApiService {
-  private readonly apiUrl = 'http://localhost:3000'; // json-server sirve db.json en el puerto 3000
+  private readonly apiUrl = 'http://localhost:3001'; // json-server sirve db.json en el puerto 3000
 
   constructor(private readonly http: HttpClient) { }
 

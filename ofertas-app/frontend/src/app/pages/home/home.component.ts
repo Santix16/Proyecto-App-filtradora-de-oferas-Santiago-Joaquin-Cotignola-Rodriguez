@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
@@ -31,39 +31,125 @@ export class HomeComponent implements OnInit {
   loading = true;
   error = '';
 
-  constructor(private apiService: ApiService, private router: Router) {}
+  constructor(
+    private apiService: ApiService, 
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private ngZone: NgZone
+  ) {}
 
   ngOnInit() {
+    console.log('🚀 ngOnInit ejecutado, iniciando carga de datos...');
+    console.log('📊 Estado inicial - loading:', this.loading);
     this.loadAllData();
   }
 
   loadAllData() {
+    console.log('📥 loadAllData() iniciado');
     this.loading = true;
+    this.error = '';
+    let completedRequests = 0;
+    const totalRequests = 2;
+
+    console.log('⏳ loading establecido a true');
+
+    // Función para verificar si todas las peticiones han terminado
+    const checkComplete = () => {
+      completedRequests++;
+      console.log(`✅ Petición completada ${completedRequests}/${totalRequests}`);
+      console.log('📊 Estado actual - loading:', this.loading);
+      
+      if (completedRequests === totalRequests) {
+        console.log('🎉 Todas las peticiones completadas!');
+        
+        // Usar NgZone.run para asegurar que Angular detecte el cambio
+        this.ngZone.run(() => {
+          // También usar setTimeout por si acaso
+          setTimeout(() => {
+            this.loading = false;
+            console.log('✅ loading establecido a FALSE');
+            console.log('📊 Estado final - loading:', this.loading);
+            
+            // Triple protección: detectChanges también
+            this.cdr.detectChanges();
+            console.log('🔄 detectChanges() ejecutado');
+            
+            // Verificar que realmente se actualizó
+            console.log('🔍 Verificación final - loading:', this.loading);
+          }, 0);
+        });
+        
+        // Si no hay datos después de cargar, mostrar mensaje
+        if (this.products.length === 0 && this.offers.length === 0) {
+          this.error = 'No se pudieron cargar los datos. Por favor, verifica que json-server esté corriendo en el puerto 3001.';
+          console.log('⚠️ No hay datos cargados');
+        } else {
+          console.log('📦 Datos disponibles - Productos:', this.products.length, 'Ofertas:', this.offers.length);
+        }
+      }
+    };
 
     // Cargar productos para contar ofertas por categoría
+    console.log('📡 Iniciando petición de productos...');
     this.apiService.getProducts().subscribe({
       next: (data: Product[]) => {
         this.products = data;
         console.log('✅ Productos cargados:', data.length);
+        checkComplete();
       },
       error: (error: any) => {
         console.error('❌ Error cargando productos:', error);
-        this.error = 'Error al cargar productos. Verifica que json-server esté corriendo.';
+        console.error('Detalles del error:', {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
+        
+        // Mensaje de error más específico
+        if (error.status === 0) {
+          this.error = 'No se puede conectar al servidor. Verifica que json-server esté corriendo en http://localhost:3001';
+        } else if (error.status === 404) {
+          this.error = 'La ruta de la API no existe. Verifica la configuración del servidor.';
+        } else {
+          this.error = `Error al cargar productos: ${error.message}`;
+        }
+        
+        checkComplete(); // ⚠️ CRÍTICO: Siempre llamar checkComplete para actualizar loading
       }
     });
 
     // Cargar ofertas activas
+    console.log('📡 Iniciando petición de ofertas...');
     this.apiService.getOffers({ isActive: true }).subscribe({
       next: (data: Offer[]) => {
         this.offers = data;
-        this.loading = false;
         console.log('✅ Ofertas cargadas:', data.length);
+        checkComplete();
       },
       error: (error: any) => {
         console.error('❌ Error cargando ofertas:', error);
-        this.loading = false;
+        console.error('Detalles del error:', {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
+        
+        // Solo actualizar el error si no había uno previo
+        if (!this.error) {
+          if (error.status === 0) {
+            this.error = 'No se puede conectar al servidor. Verifica que json-server esté corriendo en http://localhost:3001';
+          } else if (error.status === 404) {
+            this.error = 'La ruta de la API no existe. Verifica la configuración del servidor.';
+          } else {
+            this.error = `Error al cargar ofertas: ${error.message}`;
+          }
+        }
+        
+        checkComplete(); // ⚠️ CRÍTICO: Siempre llamar checkComplete para actualizar loading
       }
     });
+    
+    console.log('📤 Peticiones HTTP lanzadas (esperando respuestas...)');
   }
 
   // Método para manejar búsquedas desde el SearchBarComponent

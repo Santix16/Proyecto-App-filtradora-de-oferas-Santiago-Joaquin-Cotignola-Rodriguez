@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
@@ -20,12 +20,15 @@ export class CategoryComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly apiService: ApiService
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef  // ← AÑADIDO
   ) {}
 
   ngOnInit(): void {
+    console.log('🚀 CategoryComponent ngOnInit');
     this.route.params.subscribe(params => {
       this.categoryName = params['name'] || '';
+      console.log('📂 Categoría seleccionada:', this.categoryName);
       if (this.categoryName) {
         this.loadProductsByCategory(this.categoryName);
       }
@@ -33,8 +36,10 @@ export class CategoryComponent implements OnInit {
   }
 
   loadProductsByCategory(category: string) {
+    console.log('📥 Cargando productos de categoría:', category);
     this.loading = true;
     this.error = '';
+    console.log('⏳ loading = true');
 
     // Cargar todos los productos y filtrar por categoría local
     this.apiService.getProducts().subscribe({
@@ -47,11 +52,17 @@ export class CategoryComponent implements OnInit {
         });
         console.log(`📂 Productos en ${category}:`, this.products.length);
         this.loading = false;
+        console.log('✅ loading = false');
+        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
+        console.log('🔄 detectChanges() ejecutado');
       },
       error: (error: any) => {
-        console.error('Error loading products:', error);
+        console.error('❌ Error loading products:', error);
         this.error = 'Error al cargar productos de esta categoría';
         this.loading = false;
+        console.log('✅ loading = false (error)');
+        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
+        console.log('🔄 detectChanges() ejecutado (error)');
       }
     });
   }

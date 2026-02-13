@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, Params } from '@angular/router';
 import { ApiService } from '../../services/api.service';
@@ -34,12 +34,15 @@ export class OffersComponent implements OnInit {
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly apiService: ApiService
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef  // ← AÑADIDO
   ) {}
 
   ngOnInit(): void {
+    console.log('🚀 OffersComponent ngOnInit');
     this.route.params.subscribe((params: Params) => {
       this.productId = params['id'] || '';
+      console.log('📦 Producto ID:', this.productId);
       if (this.productId) {
         this.loadProductAndOffers(this.productId);
       }
@@ -47,28 +50,35 @@ export class OffersComponent implements OnInit {
   }
 
   loadProductAndOffers(productId: string) {
+    console.log('📥 Cargando producto y ofertas...');
     this.loading = true;
     this.error = '';
+    console.log('⏳ loading = true');
 
     // Cargar el producto
     this.apiService.getProductById(productId).subscribe({
       next: (product: Product) => {
         this.product = product;
+        console.log('✅ Producto cargado:', product.name);
         this.loadOffersForProduct(productId);
       },
       error: (error: any) => {
-        console.error('Error loading product:', error);
+        console.error('❌ Error loading product:', error);
         this.error = 'Producto no encontrado';
         this.loading = false;
+        console.log('✅ loading = false (error)');
+        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
       }
     });
   }
 
   loadOffersForProduct(productId: string) {
+    console.log('📥 Cargando ofertas del producto...');
     // Cargar ofertas activas para este producto
     // solicitar con _expand=store para que json-server incluya la tienda embebida
     this.apiService.getOffers({ productId: productId, isActive: true, _expand: 'store' }).subscribe({
       next: (offers: Offer[]) => {
+        console.log('📊 Ofertas recibidas:', offers.length);
         // Filtrar ofertas que aún están activas basándose en las fechas
         const now = new Date();
         const activeOffers = offers.filter((offer: Offer) => {
@@ -77,14 +87,19 @@ export class OffersComponent implements OnInit {
           return now >= startDate && now <= endDate;
         });
 
+        console.log('✅ Ofertas activas:', activeOffers.length);
+
         if (activeOffers.length === 0) {
           this.loading = false;
+          console.log('✅ loading = false (sin ofertas)');
+          this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
           return;
         }
 
         // Si las ofertas ya traen la tienda embebida (json-server _expand), usamos esa información
         const first = (activeOffers as any[])[0];
         if (first?.store) {
+          console.log('📍 Ofertas con tiendas embebidas');
           // construir grupos directamente
           const groupsMap = new Map<string, OffersGroup>();
 
@@ -114,16 +129,22 @@ export class OffersComponent implements OnInit {
           this.offersByStore = groups;
           this.offersWithStores = offersWithStores;
           this.loading = false;
+          console.log('✅ loading = false (ofertas cargadas)');
+          this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
+          console.log('🔄 detectChanges() ejecutado');
           return;
         }
 
         // Si no vienen embebidas, usar la lógica anterior que carga tiendas por separado
+        console.log('📍 Cargando tiendas por separado...');
         this.loadStoresForOffers(activeOffers);
       },
       error: (error: any) => {
-        console.error('Error loading offers:', error);
+        console.error('❌ Error loading offers:', error);
         this.error = 'Error al cargar ofertas';
         this.loading = false;
+        console.log('✅ loading = false (error)');
+        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
       }
     });
   }
@@ -174,10 +195,15 @@ export class OffersComponent implements OnInit {
       this.offersByStore = groups;
       this.offersWithStores = offersWithStores;
       this.loading = false;
+      console.log('✅ loading = false (tiendas cargadas)');
+      this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
+      console.log('🔄 detectChanges() ejecutado');
     }).catch(error => {
-      console.error('Error loading stores:', error);
+      console.error('❌ Error loading stores:', error);
       this.error = 'Error al cargar tiendas';
       this.loading = false;
+      console.log('✅ loading = false (error tiendas)');
+      this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
     });
   }
 
