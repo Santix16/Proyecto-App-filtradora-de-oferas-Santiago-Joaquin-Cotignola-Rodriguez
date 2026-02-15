@@ -1,62 +1,67 @@
 <div class="category-container">
-  <!-- Header -->
-  <div class="category-header">
-    <button class="back-button" (click)="goBack()">← Volver</button>
-    <div class="category-title">
-      <span class="category-emoji">{{ getCategoryEmoji(categoryName) }}</span>
+  <header class="category-header">
+    <button class="back-btn" (click)="goBack()">
+      <span class="icon">←</span> Explorar categorías
+    </button>
+    <div class="header-info">
+      <div class="emoji-circle">{{ getCategoryEmoji(categoryName) }}</div>
       <h1>{{ categoryName }}</h1>
+      <p class="subtitle">Encontramos {{ products.length }} productos con ofertas activas</p>
     </div>
-    <p class="category-subtitle">Selecciona un producto para ver sus ofertas</p>
-  </div>
+  </header>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading">
-    <p>Cargando productos...</p>
-  </div>
+  <main class="main-content">
+    <div *ngIf="loading" class="loading-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
 
-  <!-- Error -->
-  <div *ngIf="error" class="error-message">
-    {{ error }}
-  </div>
+    <div *ngIf="error" class="error-card">
+      <p>{{ error }}</p>
+      <button (click)="loadProductsByCategory(categoryName)">Reintentar</button>
+    </div>
 
-  <!-- Products Grid -->
-  <div *ngIf="!loading && !error" class="products-section">
-    <div class="products-grid" *ngIf="products.length > 0">
+    <div class="products-grid" *ngIf="!loading && !error">
       <div class="product-card" *ngFor="let product of products" (click)="onProductClick(product)">
-        <div class="product-image">
-          <img [src]="product.image" [alt]="product.name" />
-          <div *ngIf="product.discount && product.discount > 0" class="discount-badge">
+        <div class="image-container">
+          <img [src]="product.image" [alt]="product.name" loading="lazy">
+          <div class="discount-tag" *ngIf="(product.discount || 0) > 0">
             -{{ product.discount }}%
           </div>
         </div>
 
-        <div class="product-info">
+        <div class="card-body">
+          <div class="store-tag">📍 {{ product.storeName }}</div>
           <h3 class="product-name">{{ product.name }}</h3>
-          <p class="product-store">📍 {{ product.storeName }}</p>
-
-          <div class="product-rating">
-            <span class="stars">⭐ {{ product.rating }}/5</span>
-            <span class="reviews">({{ product.reviews }} reseñas)</span>
+          
+          <div class="rating-row">
+            <span class="stars">★ {{ product.rating }}</span>
+            <span class="reviews">({{ product.reviews }})</span>
           </div>
 
-          <div class="product-price">
-            <span *ngIf="product.originalPrice && product.discount && product.discount > 0" class="original-price">
-              €{{ product.originalPrice }}
-            </span>
-            <span class="current-price">€{{ product.price }}</span>
+          <div class="price-row">
+            <div class="prices">
+              <span class="current-price">{{ product.price | currency:'EUR' }}</span>
+              <span class="old-price" *ngIf="(product.discount || 0) > 0">
+                {{ product.originalPrice | currency:'EUR' }}
+              </span>
+            </div>
+            <div class="stock-status" [class.out]="!product.inStock">
+              {{ product.inStock ? 'Disponible' : 'Agotado' }}
+            </div>
           </div>
-
-          <div class="product-stock" [class.out-of-stock]="!product.inStock">
-            {{ product.inStock ? '✓ En stock' : '✗ Sin stock' }}
-          </div>
+        </div>
+        
+        <div class="card-footer">
+          <button class="action-btn">Comparar precios →</button>
         </div>
       </div>
     </div>
 
-    <!-- No products -->
-    <div *ngIf="products.length === 0" class="no-products">
-      <p>No se encontraron productos en esta categoría</p>
-      <p>Intenta con otra categoría.</p>
+    <div class="empty-state" *ngIf="!loading && products.length === 0">
+      <div class="empty-icon">🍱</div>
+      <h3>Vaya, ahora mismo no hay ofertas aquí</h3>
+      <p>Estamos buscando nuevos chollos. ¡Vuelve pronto!</p>
+      <button class="primary-btn" (click)="goBack()">Ver otras categorías</button>
     </div>
-  </div>
+  </main>
 </div>

@@ -1,21 +1,17 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, Params } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { Product } from '../../models/product.model';
 import { Offer } from '../../models/offer.model';
 import { Store } from '../../models/store.model';
-
-interface OfferWithStore {
-  offer: Offer;
-  store: Store;
-}
 
 interface OffersGroup {
   store: Store;
   offers: Offer[];
   bestScore: number;
 }
+
 @Component({
   selector: 'app-offers',
   standalone: true,
@@ -24,9 +20,7 @@ interface OffersGroup {
   styleUrls: ['./offers.component.css']
 })
 export class OffersComponent implements OnInit {
-  productId: string = '';
   product: Product | null = null;
-  offersWithStores: OfferWithStore[] = [];
   offersByStore: OffersGroup[] = [];
   loading = true;
   error = '';
@@ -35,201 +29,83 @@ export class OffersComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly apiService: ApiService,
-    private readonly cdr: ChangeDetectorRef  // ← AÑADIDO
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    console.log('🚀 OffersComponent ngOnInit');
-    this.route.params.subscribe((params: Params) => {
-      this.productId = params['id'] || '';
-      console.log('📦 Producto ID:', this.productId);
-      if (this.productId) {
-        this.loadProductAndOffers(this.productId);
-      }
+    this.route.params.subscribe(params => {
+      const productId = params['id'];
+      if (productId) this.loadData(productId);
     });
   }
 
-  loadProductAndOffers(productId: string) {
-    console.log('📥 Cargando producto y ofertas...');
-    this.loading = true;
-    this.error = '';
-    console.log('⏳ loading = true');
+  private async loadData(productId: string) {
+    try {
+      this.loading = true;
+      // 1. Cargar Producto
+      this.product = await this.apiService.getProductById(productId).toPromise() || null;
+      
+      // 2. Cargar Ofertas y Tiendas en paralelo
+      const [allOffers, allStores] = await Promise.all([
+        this.apiService.getOffers({ productId, isActive: true }).toPromise(),
+        this.apiService.getStores().toPromise()
+      ]);
 
-    // Cargar el producto
-    this.apiService.getProductById(productId).subscribe({
-      next: (product: Product) => {
-        this.product = product;
-        console.log('✅ Producto cargado:', product.name);
-        this.loadOffersForProduct(productId);
-      },
-      error: (error: any) => {
-        console.error('❌ Error loading product:', error);
-        this.error = 'Producto no encontrado';
-        this.loading = false;
-        console.log('✅ loading = false (error)');
-        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
+      if (allOffers && allStores) {
+        this.processOffers(allOffers, allStores);
       }
-    });
-  }
-
-  loadOffersForProduct(productId: string) {
-    console.log('📥 Cargando ofertas del producto...');
-    // Cargar ofertas activas para este producto
-    // solicitar con _expand=store para que json-server incluya la tienda embebida
-    this.apiService.getOffers({ productId: productId, isActive: true, _expand: 'store' }).subscribe({
-      next: (offers: Offer[]) => {
-        console.log('📊 Ofertas recibidas:', offers.length);
-        // Filtrar ofertas que aún están activas basándose en las fechas
-        const now = new Date();
-        const activeOffers = offers.filter((offer: Offer) => {
-          const startDate = new Date(offer.startDate);
-          const endDate = new Date(offer.endDate);
-          return now >= startDate && now <= endDate;
-        });
-
-        console.log('✅ Ofertas activas:', activeOffers.length);
-
-        if (activeOffers.length === 0) {
-          this.loading = false;
-          console.log('✅ loading = false (sin ofertas)');
-          this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
-          return;
-        }
-
-        // Si las ofertas ya traen la tienda embebida (json-server _expand), usamos esa información
-        const first = (activeOffers as any[])[0];
-        if (first?.store) {
-          console.log('📍 Ofertas con tiendas embebidas');
-          // construir grupos directamente
-          const groupsMap = new Map<string, OffersGroup>();
-
-          activeOffers.forEach((offer: any) => {
-            const store: Store = offer.store;
-            if (!store) return;
-
-            const score = this.computeScore(store, offer);
-
-            if (!groupsMap.has(store.id)) {
-              groupsMap.set(store.id, { store, offers: [], bestScore: score });
-            }
-            const group = groupsMap.get(store.id)!;
-            group.offers.push(offer as Offer);
-            if (score > group.bestScore) group.bestScore = score;
-          });
-
-          const groups: OffersGroup[] = Array.from(groupsMap.values()).map(g => {
-            g.offers.sort((a, b) => this.computeScore(g.store, b) - this.computeScore(g.store, a));
-            return g;
-          });
-          groups.sort((a, b) => b.bestScore - a.bestScore);
-
-          const offersWithStores: OfferWithStore[] = [];
-          groups.forEach(g => g.offers.forEach(o => offersWithStores.push({ offer: o, store: g.store })));
-
-          this.offersByStore = groups;
-          this.offersWithStores = offersWithStores;
-          this.loading = false;
-          console.log('✅ loading = false (ofertas cargadas)');
-          this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
-          console.log('🔄 detectChanges() ejecutado');
-          return;
-        }
-
-        // Si no vienen embebidas, usar la lógica anterior que carga tiendas por separado
-        console.log('📍 Cargando tiendas por separado...');
-        this.loadStoresForOffers(activeOffers);
-      },
-      error: (error: any) => {
-        console.error('❌ Error loading offers:', error);
-        this.error = 'Error al cargar ofertas';
-        this.loading = false;
-        console.log('✅ loading = false (error)');
-        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
-      }
-    });
-  }
-
-  loadStoresForOffers(offers: Offer[]) {
-    const storeIds = [...new Set(offers.map(o => o.storeId))];
-    const storePromises = storeIds.map(id => this.apiService.getStoreById(id).toPromise());
-
-    Promise.all(storePromises).then((stores: any[]) => {
-      const storeMap = new Map(
-        stores
-          .filter((s): s is Store => !!s)
-          .map((s: Store) => [s.id, s])
-      );
-
-      // Build groups by store
-      const groupsMap = new Map<string, OffersGroup>();
-
-      offers.forEach(offer => {
-        const store = storeMap.get(offer.storeId);
-        if (!store) return;
-
-        const score = this.computeScore(store, offer);
-
-        if (!groupsMap.has(store.id)) {
-          groupsMap.set(store.id, { store, offers: [], bestScore: score });
-        }
-
-        const group = groupsMap.get(store.id)!;
-        group.offers.push(offer);
-        // update best score
-        if (score > group.bestScore) group.bestScore = score;
-      });
-
-      // Sort offers inside each group by score (quality-price) desc
-      const groups: OffersGroup[] = Array.from(groupsMap.values()).map(g => {
-        g.offers.sort((a, b) => this.computeScore(g.store, b) - this.computeScore(g.store, a));
-        return g;
-      });
-
-      // Sort groups by best offer score desc
-      groups.sort((a, b) => b.bestScore - a.bestScore);
-
-      // Also keep a flat list for compatibility
-      const offersWithStores: OfferWithStore[] = [];
-      groups.forEach(g => g.offers.forEach(o => offersWithStores.push({ offer: o, store: g.store })));
-
-      this.offersByStore = groups;
-      this.offersWithStores = offersWithStores;
+      
       this.loading = false;
-      console.log('✅ loading = false (tiendas cargadas)');
-      this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
-      console.log('🔄 detectChanges() ejecutado');
-    }).catch(error => {
-      console.error('❌ Error loading stores:', error);
-      this.error = 'Error al cargar tiendas';
+      this.cdr.detectChanges();
+    } catch (err) {
+      this.error = 'Error al cargar las ofertas comparativas';
       this.loading = false;
-      console.log('✅ loading = false (error tiendas)');
-      this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
+    }
+  }
+
+  private processOffers(offers: Offer[], stores: Store[]) {
+    const groups: OffersGroup[] = [];
+
+    // Agrupar por tienda
+    offers.forEach(offer => {
+      const store = stores.find(s => s.id === offer.storeId);
+      if (!store) return;
+
+      let group = groups.find(g => g.store.id === store.id);
+      if (!group) {
+        group = { store, offers: [], bestScore: 0 };
+        groups.push(group);
+      }
+      group.offers.push(offer);
     });
+
+    // Calcular scores y ordenar ofertas internas por precio
+    groups.forEach(group => {
+      group.offers.sort((a, b) => a.finalPrice - b.finalPrice);
+      group.bestScore = this.computeScore(group.store, group.offers[0]);
+    });
+
+    // ORDENAR GRUPOS: Las mejores opciones (mejor score) arriba
+    this.offersByStore = groups.sort((a, b) => b.bestScore - a.bestScore);
   }
 
-  onOfferClick(offer: Offer) {
-    // Navegar al detalle de la oferta
-    this.router.navigate(['/offer-detail', offer.id]);
-  }
-
-  goBack() {
-    this.router.navigate(['/category', this.product?.category]);
+  private computeScore(store: Store, offer: Offer): number {
+    const storeRating = store.rating || 3;
+    const discountWeight = offer.discount * 1.5;
+    const priceFactor = 100 / offer.finalPrice; // A menor precio, más puntos
+    
+    return discountWeight + (storeRating * 10) + priceFactor;
   }
 
   getSavings(offer: Offer): number {
     return offer.originalPrice - offer.finalPrice;
   }
 
-  private computeScore(store: Store, offer: Offer): number {
-    // Simple quality-price score:
-    // higher store rating and lower finalPrice => higher score
-    const rating = store.rating ?? 3;
-    // avoid division by zero
-    const price = offer.finalPrice > 0 ? offer.finalPrice : 0.01;
-    return rating / price;
+  onOfferClick(offer: Offer) {
+    this.router.navigate(['/offer-detail', offer.id]);
   }
 
-  get totalOffersCount(): number {
-    return this.offersByStore.reduce((sum, g) => sum + g.offers.length, 0);
+  goBack() {
+    window.history.back();
   }
 }

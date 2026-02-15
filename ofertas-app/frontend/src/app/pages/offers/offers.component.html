@@ -1,84 +1,59 @@
 <div class="offers-container">
-  <!-- Header -->
   <div class="offers-header" *ngIf="product">
-    <button class="back-button" (click)="goBack()">← Volver</button>
-    <div class="product-info">
-      <img [src]="product.image" [alt]="product.name" class="product-image" />
-      <div class="product-details">
+    <button class="back-btn" (click)="goBack()">← Volver</button>
+    <div class="product-summary">
+      <img [src]="product.image" [alt]="product.name">
+      <div class="info">
         <h1>{{ product.name }}</h1>
-        <p class="product-description">{{ product.description }}</p>
-        <div class="product-meta">
-          <span class="category">📂 {{ product.category }}</span>
-          <span class="rating">⭐ {{ product.rating }}/5 ({{ product.reviews }} reseñas)</span>
-        </div>
+        <span class="tag">{{ product.category }}</span>
       </div>
     </div>
-    <p class="offers-count">{{ totalOffersCount }} ofertas disponibles</p>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading">
-    <p>Buscando ofertas...</p>
-  </div>
+  <div *ngIf="loading" class="loader">Analizando precios y calidad...</div>
 
-  <!-- Error -->
-  <div *ngIf="error" class="error-message">
-    {{ error }}
-  </div>
+  <div class="comparison-grid" *ngIf="!loading && offersByStore.length > 0">
+    <div class="store-group" *ngFor="let group of offersByStore; let first = first">
+      
+      <div class="best-choice-badge" *ngIf="first">
+        ⭐ MEJOR OPCIÓN CALIDAD-PRECIO
+      </div>
 
-  <!-- Offers List -->
-  <div *ngIf="!loading && !error" class="offers-section">
-    <div class="offers-list" *ngIf="offersByStore.length > 0">
-      <div class="store-group" *ngFor="let group of offersByStore">
+      <div class="store-card" [class.highlight]="first">
         <div class="store-header">
-          <h2>{{ group.store.name }}</h2>
-          <p class="store-address">📍 {{ group.store.address }}, {{ group.store.city }}</p>
-          <div class="store-rating">
-            <span>⭐ {{ group.store.rating }}/5</span>
-            <span>({{ group.store.reviews }} reseñas)</span>
+          <div class="store-brand">
+            <div class="store-logo">{{ group.store.name.charAt(0) }}</div>
+            <div>
+              <h3>{{ group.store.name }}</h3>
+              <div class="store-rating">
+                <span class="stars">★</span> {{ group.store.rating }} 
+                <span class="city">| {{ group.store.city }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="store-offers">
-          <button class="offer-card" *ngFor="let offer of group.offers" (click)="onOfferClick(offer)" type="button" (keydown.enter)="onOfferClick(offer)">
-            <div class="offer-header">
-              <div class="store-info">
-                <div class="discount-badge">-{{ offer.discount }}%</div>
-              </div>
+        <div class="offers-sublist">
+          <div class="offer-row" *ngFor="let offer of group.offers" (click)="onOfferClick(offer)">
+            <div class="price-box">
+              <span class="old-price">{{ offer.originalPrice | currency:'EUR' }}</span>
+              <span class="new-price">{{ offer.finalPrice | currency:'EUR' }}</span>
+            </div>
+            
+            <div class="discount-pill">-{{ offer.discount }}%</div>
+            
+            <div class="savings-text">
+              Ahorras {{ getSavings(offer) | currency:'EUR' }}
             </div>
 
-            <div class="offer-details">
-              <p class="offer-description">{{ offer.description }}</p>
-
-              <div class="price-section">
-                <div class="prices">
-                  <span class="original-price">€{{ offer.originalPrice }}</span>
-                  <span class="final-price">€{{ offer.finalPrice }}</span>
-                </div>
-                <div class="savings">
-                  ¡Ahorras €{{ getSavings(offer) }}!
-                </div>
-              </div>
-
-              <div class="offer-dates">
-                <span class="date-range">
-                  📅 Válida del {{ offer.startDate | date:'dd/MM/yyyy' }} al {{ offer.endDate | date:'dd/MM/yyyy' }}
-                </span>
-              </div>
-            </div>
-
-            <div class="offer-actions">
-              <span class="view-details-button">Ver Detalles y Ubicación</span>
-            </div>
-          </button>
+            <button class="select-btn">Ver tienda →</button>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- No offers -->
-    <div *ngIf="totalOffersCount === 0" class="no-offers">
-      <p>No hay ofertas disponibles para este producto</p>
-      <p>Intenta con otro producto o vuelve más tarde.</p>
-    </div>
+  <div *ngIf="!loading && offersByStore.length === 0" class="empty">
+    No hay ofertas competitivas para este producto ahora mismo.
   </div>
 </div>

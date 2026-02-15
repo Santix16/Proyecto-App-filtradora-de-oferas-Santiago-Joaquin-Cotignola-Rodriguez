@@ -21,14 +21,12 @@ export class CategoryComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly apiService: ApiService,
-    private readonly cdr: ChangeDetectorRef  // ← AÑADIDO
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    console.log('🚀 CategoryComponent ngOnInit');
     this.route.params.subscribe(params => {
       this.categoryName = params['name'] || '';
-      console.log('📂 Categoría seleccionada:', this.categoryName);
       if (this.categoryName) {
         this.loadProductsByCategory(this.categoryName);
       }
@@ -36,39 +34,25 @@ export class CategoryComponent implements OnInit {
   }
 
   loadProductsByCategory(category: string) {
-    console.log('📥 Cargando productos de categoría:', category);
     this.loading = true;
-    this.error = '';
-    console.log('⏳ loading = true');
-
-    // Cargar todos los productos y filtrar por categoría local
     this.apiService.getProducts().subscribe({
-      next: (allProducts: Product[]) => {
-        // Filtrar productos por la categoría recibida (case-insensitive)
-        this.products = allProducts.filter(p => {
-          const productCat = (p.category || '').trim().toLowerCase();
-          const searchCat = (category || '').trim().toLowerCase();
-          return productCat === searchCat;
-        });
-        console.log(`📂 Productos en ${category}:`, this.products.length);
+      next: (allProducts) => {
+        // Filtramos localmente para asegurar consistencia con los nombres de categoría
+        this.products = allProducts.filter(p => 
+          p.category?.toLowerCase() === category.toLowerCase()
+        );
         this.loading = false;
-        console.log('✅ loading = false');
-        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
-        console.log('🔄 detectChanges() ejecutado');
+        this.cdr.detectChanges();
       },
-      error: (error: any) => {
-        console.error('❌ Error loading products:', error);
-        this.error = 'Error al cargar productos de esta categoría';
+      error: (err) => {
+        this.error = 'No hemos podido cargar los productos. Reinténtalo en unos minutos.';
         this.loading = false;
-        console.log('✅ loading = false (error)');
-        this.cdr.detectChanges();  // ← FORZAR DETECCIÓN
-        console.log('🔄 detectChanges() ejecutado (error)');
+        this.cdr.detectChanges();
       }
     });
   }
 
   onProductClick(product: Product) {
-    // Navegar a la página de ofertas del producto
     this.router.navigate(['/offers', product.id]);
   }
 
@@ -78,14 +62,9 @@ export class CategoryComponent implements OnInit {
 
   getCategoryEmoji(category: string): string {
     const emojiMap: { [key: string]: string } = {
-      'Lácteos': '🥛',
-      'Panadería': '🍞',
-      'Carnes': '🥩',
-      'Frutas y Verduras': '🥕',
-      'Bebidas': '🥤',
-      'Limpieza': '🧹',
-      'Congelados': '🧊',
-      'Alimentación': '🍽️'
+      'Lácteos': '🥛', 'Panadería': '🍞', 'Carnes': '🥩', 
+      'Frutas y Verduras': '🥕', 'Bebidas': '🥤', 'Limpieza': '🧹', 
+      'Congelados': '🧊', 'Alimentación': '🍽️'
     };
     return emojiMap[category] || '📦';
   }
