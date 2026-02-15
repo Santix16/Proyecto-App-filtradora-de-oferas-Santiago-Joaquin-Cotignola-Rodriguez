@@ -11,16 +11,23 @@ import { FormsModule } from '@angular/forms';
 })
 export class SearchBarComponent {
   @Output() search = new EventEmitter<string>();
-  searchQuery = '';
+  
+  // Usamos un nombre claro para el binding del input
+  ngModelSearchQuery = '';
 
   onSearch() {
-    this.search.emit(this.searchQuery);
+    this.search.emit(this.ngModelSearchQuery.trim());
   }
 
   onInputChange() {
-    // Búsqueda en tiempo real (opcional)
-    if (this.searchQuery.length >= 2 || this.searchQuery.length === 0) {
-      this.search.emit(this.searchQuery);
+    // Búsqueda en tiempo real (opcional, solo si quieres reactividad inmediata)
+    if (this.ngModelSearchQuery.length >= 2 || this.ngModelSearchQuery.length === 0) {
+      this.search.emit(this.ngModelSearchQuery.trim());
     }
+  }
+
+  clearSearch() {
+    this.ngModelSearchQuery = '';
+    this.search.emit('');
   }
 }
