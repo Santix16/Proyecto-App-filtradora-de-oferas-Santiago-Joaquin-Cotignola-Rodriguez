@@ -23,7 +23,7 @@
 /* Badge de Mejor Opción */
 .best-choice-badge {
   background: #f1c40f;
-  color: #000;
+  color: #1a1a1a;
   display: inline-block;
   padding: 5px 15px;
   border-radius: 10px 10px 0 0;
@@ -61,7 +61,7 @@
 .store-logo {
   width: 45px;
   height: 45px;
-  background: #3498db;
+  background: #0e5a8f;
   color: white;
   border-radius: 10px;
   display: flex;
@@ -100,8 +100,8 @@
 }
 
 .discount-pill {
-  background: #ebfaef;
-  color: #27ae60;
+  background: #e8f5e9;
+  color: #1b5e20;
   padding: 4px 8px;
   border-radius: 6px;
   font-weight: bold;
@@ -115,11 +115,27 @@
 }
 
 .select-btn {
-  background: #3498db;
+  background: #0e5a8f;
   color: white;
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.fav-btn {
+  background: #0e5a8f;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ensure click indicator isn't interfered */
+.fav-btn span {
+  pointer-events: none;
 }

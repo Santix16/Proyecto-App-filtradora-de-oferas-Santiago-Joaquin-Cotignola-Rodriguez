@@ -1,6 +1,7 @@
 <div class="results-container">
   <div class="results-header">
     <h1>Ofertas en {{ subcategory }}</h1>
+    <a routerLink="/my-list" class="list-link">Mi lista</a>
     <p *ngIf="offersWithDetails.length > 0">{{ offersWithDetails.length }} ofertas encontradas</p>
   </div>
 

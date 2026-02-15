@@ -1,8 +1,10 @@
 <div class="category-container">
   <header class="category-header">
-    <button class="back-btn" (click)="goBack()">
-      <span class="icon">←</span> Explorar categorías
-    </button>
+    <div class="header-actions">
+      <button class="back-btn" (click)="goBack()">
+        <span class="icon">←</span> Explorar categorías
+      </button>
+    </div>
     <div class="header-info">
       <div class="emoji-circle">{{ getCategoryEmoji(categoryName) }}</div>
       <h1>{{ categoryName }}</h1>
@@ -21,40 +23,19 @@
     </div>
 
     <div class="products-grid" *ngIf="!loading && !error">
-      <div class="product-card" *ngFor="let product of products" (click)="onProductClick(product)">
+      <button class="product-card" *ngFor="let product of products" (click)="onProductClick(product)">
         <div class="image-container">
           <img [src]="product.image" [alt]="product.name" loading="lazy">
-          <div class="discount-tag" *ngIf="(product.discount || 0) > 0">
-            -{{ product.discount }}%
-          </div>
         </div>
 
         <div class="card-body">
-          <div class="store-tag">📍 {{ product.storeName }}</div>
           <h3 class="product-name">{{ product.name }}</h3>
-          
-          <div class="rating-row">
-            <span class="stars">★ {{ product.rating }}</span>
-            <span class="reviews">({{ product.reviews }})</span>
-          </div>
-
-          <div class="price-row">
-            <div class="prices">
-              <span class="current-price">{{ product.price | currency:'EUR' }}</span>
-              <span class="old-price" *ngIf="(product.discount || 0) > 0">
-                {{ product.originalPrice | currency:'EUR' }}
-              </span>
-            </div>
-            <div class="stock-status" [class.out]="!product.inStock">
-              {{ product.inStock ? 'Disponible' : 'Agotado' }}
-            </div>
-          </div>
         </div>
-        
+
         <div class="card-footer">
           <button class="action-btn">Comparar precios →</button>
         </div>
-      </div>
+      </button>
     </div>
 
     <div class="empty-state" *ngIf="!loading && products.length === 0">

@@ -1,0 +1,28 @@
+<div class="personal-list-container">
+  <header class="list-header">
+    <h1>Mi lista de ofertas</h1>
+    <button class="clear-btn" (click)="clearAll()" *ngIf="offersWithDetails.length > 0">🗑️ Vaciar lista</button>
+  </header>
+
+
+
+  <div *ngIf="loading && offersWithDetails.length === 0" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando tus ofertas guardadas...</p>
+  </div>
+
+  <div *ngIf="error" class="error-banner">
+    <span>⚠️ {{ error }}</span>
+  </div>
+
+  <div *ngIf="!loading && offersWithDetails.length > 0" class="offers-grid">
+    <app-offer-card *ngFor="let od of offersWithDetails" [offerDetails]="od"></app-offer-card>
+  </div>
+
+
+  <div *ngIf="!loading && offersWithDetails.length === 0" class="empty-state">
+    <div class="empty-icon">🛒</div>
+    <h3>No tienes ofertas guardadas</h3>
+    <p>Ve a una categoría y guarda la oferta que te interese.</p>
+  </div>
+</div>

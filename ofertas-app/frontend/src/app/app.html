@@ -1,1 +1,12 @@
+<header class="app-global-header">
+  <nav>
+    <ng-container *ngIf="showMyList()">
+      <a routerLink="/my-list" class="global-link">Mi lista</a>
+    </ng-container>
+    <ng-container *ngIf="!showMyList()">
+      <a routerLink="/home" class="global-link back-link">Inicio</a>
+    </ng-container>
+  </nav>
+</header>
+
 <router-outlet />

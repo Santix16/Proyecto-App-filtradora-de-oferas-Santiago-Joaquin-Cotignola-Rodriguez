@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { SearchBarComponent } from '../../components/search-bar/search-bar.component';
 import { ApiService } from '../../services/api.service';
 import { Product } from '../../models/product.model';
@@ -9,32 +9,32 @@ import { Offer } from '../../models/offer.model';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, SearchBarComponent],
+  imports: [CommonModule, SearchBarComponent, RouterModule],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
   products: Product[] = [];
   offers: Offer[] = [];
-  
+
   // Lista maestra de categorías
   allCategories: string[] = [
-    'Lácteos', 'Panadería', 'Carnes', 'Frutas y Verduras', 
+    'Lácteos', 'Panadería', 'Carnes', 'Frutas y Verduras',
     'Bebidas', 'Limpieza', 'Congelados', 'Alimentación'
   ];
-  
+
   // Lista que se renderiza en el HTML
   filteredCategories: string[] = [];
-  
+
   loading = true;
   error = '';
   searchActive = false;
 
   constructor(
-    private apiService: ApiService, 
-    private router: Router,
-    private cdr: ChangeDetectorRef,
-    private ngZone: NgZone
+    private readonly apiService: ApiService,
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly ngZone: NgZone
   ) {
     // Inicializamos la vista con todas las categorías
     this.filteredCategories = [...this.allCategories];
@@ -47,7 +47,7 @@ export class HomeComponent implements OnInit {
   loadAllData() {
     this.loading = true;
     let completed = 0;
-    
+
     const check = () => {
       completed++;
       if (completed === 2) {
@@ -72,13 +72,13 @@ export class HomeComponent implements OnInit {
   // Ahora la búsqueda filtra las categorías locales
   onSearch(query: string) {
     const term = query.trim().toLowerCase();
-    
-    if (!term) {
+
+    if (term === '') {
       this.searchActive = false;
       this.filteredCategories = [...this.allCategories];
     } else {
       this.searchActive = true;
-      this.filteredCategories = this.allCategories.filter(cat => 
+      this.filteredCategories = this.allCategories.filter(cat =>
         cat.toLowerCase().includes(term)
       );
     }
@@ -91,8 +91,8 @@ export class HomeComponent implements OnInit {
 
   getCategoryEmoji(category: string): string {
     const emojiMap: { [key: string]: string } = {
-      'Lácteos': '🥛', 'Panadería': '🍞', 'Carnes': '🥩', 
-      'Frutas y Verduras': '🥕', 'Bebidas': '🥤', 'Limpieza': '🧹', 
+      'Lácteos': '🥛', 'Panadería': '🍞', 'Carnes': '🥩',
+      'Frutas y Verduras': '🥕', 'Bebidas': '🥤', 'Limpieza': '🧹',
       'Congelados': '🧊', 'Alimentación': '🍽️'
     };
     return emojiMap[category] || '📦';
@@ -112,10 +112,27 @@ export class HomeComponent implements OnInit {
     return descriptionMap[category] || 'Explora productos de esta categoría';
   }
 
+  /**
+   * Número de productos con descuento dentro de la categoría.
+   * La aplicación solo muestra artículos rebajados, por lo que el contador
+   * debe replicar ese comportamiento.
+   */
+  getProductCountForCategory(category: string): number {
+    return this.products.filter(
+      p => p.category?.toLowerCase() === category.toLowerCase()
+           && (p.discount || 0) > 0
+    ).length;
+  }
+
+  /**
+   * Total de ofertas activas para los productos de la categoría.
+   */
   getOffersCountForCategory(category: string): number {
-    const productIds = this.products
-      .filter(p => p.category?.toLowerCase() === category.toLowerCase())
-      .map(p => p.id);
-    return this.offers.filter(o => productIds.includes(o.productId) && o.isActive).length;
+    const productIds = new Set(
+      this.products
+        .filter(p => p.category?.toLowerCase() === category.toLowerCase())
+        .map(p => p.id)
+    );
+    return this.offers.filter(o => productIds.has(o.productId) && o.isActive).length;
   }
 }

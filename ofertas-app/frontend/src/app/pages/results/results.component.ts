@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { OfferCardComponent } from '../../components/offer-card/offer-card.component';
 import { ApiService } from '../../services/api.service';
 import { Product } from '../../models/product.model';
 import { Offer } from '../../models/offer.model';
 import { Store } from '../../models/store.model';
+import { lastValueFrom } from 'rxjs';
 
 interface OfferWithDetails {
   offer: Offer;
@@ -16,7 +17,7 @@ interface OfferWithDetails {
 @Component({
   selector: 'app-results',
   standalone: true,
-  imports: [CommonModule, OfferCardComponent],
+  imports: [CommonModule, OfferCardComponent, RouterModule],
   templateUrl: './results.component.html',
   styleUrls: ['./results.component.css']
 })
@@ -27,8 +28,8 @@ export class ResultsComponent implements OnInit {
   error = '';
 
   constructor(
-    private route: ActivatedRoute,
-    private apiService: ApiService
+    private readonly route: ActivatedRoute,
+    private readonly apiService: ApiService
   ) {}
 
   ngOnInit(): void {
@@ -49,18 +50,18 @@ export class ResultsComponent implements OnInit {
       next: (products: Product[]) => {
         // Filtrar productos que pertenecen a esta subcategoría
         const productsInSubcategory = this.filterProductsBySubcategory(products, subcategory);
-        
+
         if (productsInSubcategory.length === 0) {
           this.loading = false;
           return;
         }
 
-        const productIds = productsInSubcategory.map(p => p.id);
+        const productIds = new Set(productsInSubcategory.map(p => p.id));
 
         // Obtener ofertas activas para estos productos
         this.apiService.getOffers({ isActive: true }).subscribe({
           next: (offers: Offer[]) => {
-            const offersForSubcategory = offers.filter((o: Offer) => productIds.includes(o.productId));
+            const offersForSubcategory = offers.filter((o: Offer) => productIds.has(o.productId));
 
             // Para cada oferta, combinar con producto y tienda
             this.combineOffersWithDetails(offersForSubcategory, productsInSubcategory);
@@ -97,7 +98,7 @@ export class ResultsComponent implements OnInit {
     };
 
     const keywords = keywordMap[subcategory] || [];
-    
+
     return products.filter(product => {
       const name = product.name.toLowerCase();
       return keywords.some(keyword => name.includes(keyword));
@@ -109,10 +110,10 @@ export class ResultsComponent implements OnInit {
 
     // Obtener todas las tiendas necesarias
     const storeIds = [...new Set(offers.map(o => o.storeId))];
-    const storePromises = storeIds.map(id => this.apiService.getStoreById(id).toPromise());
+    const storePromises = storeIds.map(id => lastValueFrom(this.apiService.getStoreById(id)));
 
-    Promise.all(storePromises).then((stores: any[]) => {
-      const storeMap = new Map(stores.filter((s: Store | null | undefined) => s !== null && s !== undefined).map((s: Store) => [s!.id, s!]));
+    Promise.all(storePromises).then((stores: Store[]) => {
+      const storeMap = new Map(stores.filter(Boolean).map((s: Store) => [s.id, s]));
 
       offers.forEach(offer => {
         const product = products.find(p => p.id === offer.productId);

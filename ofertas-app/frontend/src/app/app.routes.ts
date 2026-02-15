@@ -5,6 +5,7 @@ import { OffersComponent } from './pages/offers/offers.component';
 import { OfferDetailComponent } from './pages/offer-detail/offer-detail.component';
 import { ResultsComponent } from './pages/results/results.component';
 import { ProductDetailComponent } from './pages/product-detail/product-detail.component';
+import { PersonalListComponent } from './pages/personal-list/personal-list.component';
 
 export const routes: Routes = [
   { path: 'home', component: HomeComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'offer-detail/:id', component: OfferDetailComponent },
   { path: 'results', component: ResultsComponent },
   { path: 'product/:id', component: ProductDetailComponent },
+  { path: 'my-list', component: PersonalListComponent },
   { path: '**', redirectTo: 'home' }
 ];

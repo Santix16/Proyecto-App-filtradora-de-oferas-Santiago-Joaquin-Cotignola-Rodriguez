@@ -1,13 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { Product } from '../../models/product.model';
 
 @Component({
   selector: 'app-category',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './category.component.html',
   styleUrls: ['./category.component.css']
 })
@@ -35,11 +35,14 @@ export class CategoryComponent implements OnInit {
 
   loadProductsByCategory(category: string) {
     this.loading = true;
-    this.apiService.getProducts().subscribe({
+    // solicitamos al backend únicamente productos con descuento para cumplir
+    // la regla de negocio de "solo ofertas"
+    this.apiService.getProducts({ category, discount_gte: 1 }).subscribe({
       next: (allProducts) => {
-        // Filtramos localmente para asegurar consistencia con los nombres de categoría
-        this.products = allProducts.filter(p => 
+        // en caso de que el servidor no haya respetado el filtro, lo reforzamos
+        this.products = allProducts.filter(p =>
           p.category?.toLowerCase() === category.toLowerCase()
+          && (p.discount || 0) > 0
         );
         this.loading = false;
         this.cdr.detectChanges();
@@ -62,8 +65,8 @@ export class CategoryComponent implements OnInit {
 
   getCategoryEmoji(category: string): string {
     const emojiMap: { [key: string]: string } = {
-      'Lácteos': '🥛', 'Panadería': '🍞', 'Carnes': '🥩', 
-      'Frutas y Verduras': '🥕', 'Bebidas': '🥤', 'Limpieza': '🧹', 
+      'Lácteos': '🥛', 'Panadería': '🍞', 'Carnes': '🥩',
+      'Frutas y Verduras': '🥕', 'Bebidas': '🥤', 'Limpieza': '🧹',
       'Congelados': '🧊', 'Alimentación': '🍽️'
     };
     return emojiMap[category] || '📦';

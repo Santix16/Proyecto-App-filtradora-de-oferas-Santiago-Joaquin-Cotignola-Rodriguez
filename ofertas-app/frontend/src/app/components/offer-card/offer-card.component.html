@@ -1,23 +1,26 @@
-<div class="offer-card" *ngIf="offerDetails" (click)="onCardClick()">
-  <div class="card-image">
-    <img [src]="offerDetails.product.image" [alt]="offerDetails.product.name" />
-    <div class="discount-badge">
-      -{{ discountPercentage }}%
+<article class="offer-card" *ngIf="offerDetails">
+  <a class="card-link" (click)="onCardClick()" role="link" tabindex="0">
+    <div class="card-image">
+      <img [src]="offerDetails.product.image" [alt]="offerDetails.product.name" />
+      <div class="discount-badge">-{{ discountPercentage }}%</div>
     </div>
-  </div>
-  <div class="card-content">
-    <h3>{{ offerDetails.product.name }}</h3>
-    <p class="store-name">📍 {{ offerDetails.store.name }}</p>
-    <p class="description">{{ offerDetails.product.description }}</p>
-    <div class="price-section">
-      <span class="original-price">€{{ originalPrice }}</span>
-      <span class="current-price">€{{ finalPrice }}</span>
+    <div class="card-content">
+      <h3>{{ offerDetails.product?.name }}</h3>
+      <p class="store-name">📍 {{ offerDetails.store?.name || '...' }}</p>
+      <p class="description">{{ offerDetails.product?.description }}</p>
+      <div class="price-section">
+        <span class="original-price">€{{ originalPrice }}</span>
+        <span class="current-price">€{{ finalPrice }}</span>
+      </div>
+      <div class="offer-info">
+        <span class="offer-description">{{ offerDetails.offer?.description }}</span>
+      </div>
+      <div class="location-info">
+        <span class="location">📍 {{ offerDetails.store?.address || '' }}{{ offerDetails.store?.city ? ', ' + offerDetails.store.city : '' }}</span>
+      </div>
     </div>
-    <div class="offer-info">
-      <span class="offer-description">{{ offerDetails.offer.description }}</span>
-    </div>
-    <div class="location-info">
-      <span class="location">📍 {{ offerDetails.store.address }}, {{ offerDetails.store.city }}</span>
-    </div>
-  </div>
-</div>
+  </a>
+  <button class="fav-btn" (click)="$event.stopPropagation(); toggleFavorite($event)" type="button">
+    {{ favorite ? 'Eliminar' : 'Guardar' }}
+  </button>
+</article>

@@ -12,6 +12,23 @@
   text-align: center;
 }
 
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.list-link {
+  color: #ef4444;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.list-link:hover {
+  text-decoration: underline;
+}
+
 .back-btn {
   background: transparent;
   border: 1px solid #e2e8f0;
@@ -95,29 +112,17 @@
   object-fit: contain;
 }
 
-.discount-tag {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background: #ef4444;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
+/* discount-tag removed from product cards */
+.discount-tag { display: none; }
 
 .card-body {
   padding: 20px;
   flex-grow: 1;
 }
 
+/* store-tag removed - no longer shown on product cards */
 .store-tag {
-  color: #3b82f6;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+  display: none;
 }
 
 .product-name {
@@ -131,51 +136,27 @@
   overflow: hidden;
 }
 
-.rating-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 15px;
-}
+/* rating-row removed - ratings hidden */
+.rating-row { display: none; }
 
-.stars {
-  color: #f59e0b;
-  font-weight: 700;
-}
+/* stars style no longer used */
+.stars { display: none; }
 
-.reviews {
-  color: #94a3b8;
-  font-size: 0.85rem;
-}
+/* reviews style no longer used */
+.reviews { display: none; }
 
-.price-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+/* price-row hidden since prices are not shown */
+.price-row { display: none; }
 
-.current-price {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #059669;
-}
+/* current-price style removed */
+.current-price { display: none; }
 
-.old-price {
-  color: #94a3b8;
-  text-decoration: line-through;
-  font-size: 0.9rem;
-  margin-left: 5px;
-}
+/* old-price style removed */
+.old-price { display: none; }
 
-.stock-status {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #059669;
-}
-
-.stock-status.out {
-  color: #ef4444;
-}
+/* stock status removed from cards */
+.stock-status { display: none; }
+.stock-status.out { display: none; }
 
 .card-footer {
   padding: 15px 20px;
@@ -196,7 +177,7 @@
 
 .product-card:hover .action-btn {
   background: #3b82f6;
-  color: white;
+  color: black;
 }
 
 /* Empty State */

@@ -93,3 +93,4 @@ export class ApiService {
     return this.http.get<Product[]>(`${this.apiUrl}/products?_page=${page}&_limit=${limit}`);
   }
 }
+

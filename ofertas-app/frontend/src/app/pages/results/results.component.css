@@ -9,7 +9,7 @@
   margin-bottom: 40px;
   padding: 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: black;
   border-radius: 16px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
@@ -26,6 +26,19 @@
   font-size: 1.1rem;
   opacity: 0.9;
   font-weight: 300;
+}
+
+.results-header .list-link {
+  color: #ffeb3b;
+  font-weight: 600;
+  text-decoration: none;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.results-header .list-link:hover {
+  text-decoration: underline;
 }
 
 .loading {

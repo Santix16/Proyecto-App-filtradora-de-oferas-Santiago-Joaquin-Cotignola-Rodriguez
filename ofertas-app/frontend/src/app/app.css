@@ -1,0 +1,27 @@
+.app-global-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 10px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.app-global-header .global-link {
+  color: #ef4444;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 6px 12px;
+}
+
+.app-global-header .global-link:hover {
+  text-decoration: underline;
+}
+
+/* Back link on personal list should be more prominent */
+.app-global-header .back-link {
+  font-size: 1.5rem;
+  padding: 8px 16px;
+}
+
