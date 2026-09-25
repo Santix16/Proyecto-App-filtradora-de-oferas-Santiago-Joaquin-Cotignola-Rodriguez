@@ -2,11 +2,15 @@ const Offer = require('../models/Offer');
 
 const getAllOffers = async (req, res) => {
   try {
-    const { storeId, isActive } = req.query;
+    const { storeId, productId, isActive } = req.query;
     let query = {};
 
     if (storeId) {
       query.storeId = storeId;
+    }
+
+    if (productId) {
+      query.productId = productId;
     }
 
     if (isActive !== undefined) {
@@ -15,9 +19,7 @@ const getAllOffers = async (req, res) => {
       query.isActive = true;
     }
 
-    const offers = await Offer.find(query)
-      .populate('productId')
-      .populate('storeId');
+    const offers = await Offer.find(query);
 
     res.json(offers);
   } catch (error) {
@@ -27,9 +29,7 @@ const getAllOffers = async (req, res) => {
 
 const getOfferById = async (req, res) => {
   try {
-    const offer = await Offer.findById(req.params.id)
-      .populate('productId')
-      .populate('storeId');
+    const offer = await Offer.findById(req.params.id);
 
     if (!offer) {
       return res.status(404).json({ error: 'Offer not found' });

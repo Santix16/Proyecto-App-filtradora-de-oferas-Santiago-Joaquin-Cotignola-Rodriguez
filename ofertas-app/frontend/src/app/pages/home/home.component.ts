@@ -113,15 +113,30 @@ export class HomeComponent implements OnInit {
   }
 
   /**
-   * Número de productos con descuento dentro de la categoría.
-   * La aplicación solo muestra artículos rebajados, por lo que el contador
-   * debe replicar ese comportamiento.
+   * IDs de producto de esta categoría que tienen al menos una oferta activa.
+   * Es la única fuente de verdad: el campo product.discount no refleja
+   * las ofertas reales (viven en la colección Offer, aparte).
+   */
+  private getProductIdsWithActiveOffer(category: string): Set<string> {
+    const categoryProductIds = new Set(
+      this.products
+        .filter(p => p.category?.toLowerCase() === category.toLowerCase())
+        .map(p => p.id)
+    );
+    const withOffer = new Set<string>();
+    this.offers.forEach(o => {
+      if (o.isActive && categoryProductIds.has(o.productId)) {
+        withOffer.add(o.productId);
+      }
+    });
+    return withOffer;
+  }
+
+  /**
+   * Número de productos de la categoría que tienen alguna oferta activa.
    */
   getProductCountForCategory(category: string): number {
-    return this.products.filter(
-      p => p.category?.toLowerCase() === category.toLowerCase()
-           && (p.discount || 0) > 0
-    ).length;
+    return this.getProductIdsWithActiveOffer(category).size;
   }
 
   /**

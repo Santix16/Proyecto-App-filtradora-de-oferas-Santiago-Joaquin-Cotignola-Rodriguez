@@ -16,7 +16,7 @@
     <div class="store-group" *ngFor="let group of offersByStore; let first = first">
 
       <div class="best-choice-badge" *ngIf="first">
-        ⭐ MEJOR OPCIÓN CALIDAD-PRECIO
+        MEJOR OPCIÓN CALIDAD-PRECIO
       </div>
 
       <div class="store-card" [class.highlight]="first">
@@ -34,22 +34,26 @@
         </div>
 
         <div class="offers-sublist">
-          <button class="offer-row" *ngFor="let offer of group.offers" (click)="onOfferClick(offer)" type="button">
+          <div class="offer-row" *ngFor="let offer of group.offers">
             <div class="price-box">
               <span class="old-price">{{ offer.originalPrice | currency:'EUR' }}</span>
               <span class="new-price">{{ offer.finalPrice | currency:'EUR' }}</span>
-            </div>
+          </div>
 
-            <div class="discount-pill">-{{ offer.discount }}%</div>
+          <div class="discount-pill">-{{ offer.discount }}%</div>
 
             <div class="savings-text">
               Ahorras {{ getSavings(offer) | currency:'EUR' }}
             </div>
 
+            <button class="details-btn" (click)="onOfferClick(offer)" type="button">
+              Ver detalles
+            </button>
+
             <button class="fav-btn" (click)="$event.stopPropagation(); toggleFavorite(offer, $event)" type="button">
               {{ isFavorite(offer.id) ? 'Eliminar' : 'Guardar' }}
             </button>
-          </button>
+          </div>
         </div>
       </div>
     </div>

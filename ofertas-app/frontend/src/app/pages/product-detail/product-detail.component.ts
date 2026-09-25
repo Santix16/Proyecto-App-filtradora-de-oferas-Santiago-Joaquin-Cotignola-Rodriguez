@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
+import { combineLatest } from 'rxjs';
 import { ApiService } from '../../services/api.service';
 import { Product } from '../../models/product.model';
 import { Offer } from '../../models/offer.model';
@@ -22,16 +23,22 @@ export class ProductDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const productId = params['id'];
-      const offerId = this.route.snapshot.queryParams['offerId'];
+  ngOnInit() {
+    combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, queryParams]) => {
+      const productId = params.get('id') || params.get('productId');
+      const offerId = queryParams.get('offerId');
 
-      if (productId) {
-        this.loadProductDetails(productId, offerId);
+      if (productId && productId !== 'undefined' && productId !== 'null') {
+        this.loadProductDetails(productId, offerId || undefined);
+      } else {
+        console.error('No se encontró ningún ID válido en la ruta');
+        this.loading = false;
+        this.error = 'ID de producto inválido';
+        this.cdr.detectChanges();
       }
     });
   }
@@ -39,26 +46,34 @@ export class ProductDetailComponent implements OnInit {
   private loadProductDetails(productId: string, offerId?: string) {
     this.loading = true;
 
-    // Cargar producto
     this.apiService.getProductById(productId).subscribe({
       next: (product: Product) => {
         this.product = product;
 
-        // Si hay offerId, cargar la oferta específica
-        if (offerId) {
+        if (offerId && offerId !== 'undefined') {
           this.loadOfferDetails(offerId);
         } else {
-          // Si no hay oferta específica, buscar ofertas activas para este producto
           this.apiService.getOffers({ productId: productId, isActive: true }).subscribe({
-            next: (offers: Offer[]) => {
-              if (offers.length > 0) {
-                this.loadOfferDetails(offers[0].id);
+            next: (offers: any[]) => {
+              if (offers && offers.length > 0) {
+                const validOfferId = offers[0].id || offers[0]._id;
+
+                if (validOfferId) {
+                  this.loadOfferDetails(validOfferId);
+                } else {
+                  console.warn('La oferta encontrada no tiene un ID válido (_id o id)');
+                  this.loading = false;
+                  this.cdr.detectChanges();
+                }
               } else {
                 this.loading = false;
+                this.cdr.detectChanges();
               }
             },
-            error: () => {
+            error: (err) => {
+              console.error('Error fetching offers list:', err);
               this.loading = false;
+              this.cdr.detectChanges();
             }
           });
         }
@@ -67,30 +82,51 @@ export class ProductDetailComponent implements OnInit {
         console.error('Error loading product:', error);
         this.error = 'Producto no encontrado';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   private loadOfferDetails(offerId: string) {
+    if (!offerId || offerId === 'undefined' || offerId === 'null') {
+      this.loading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
     this.apiService.getOfferById(offerId).subscribe({
-      next: (offer: Offer) => {
+      next: (offer: any) => {
         this.offer = offer;
 
-        // Cargar información de la tienda
-        this.apiService.getStoreById(offer.storeId).subscribe({
-          next: (store: Store) => {
-            this.store = store;
-            this.loading = false;
-          },
-          error: (error: any) => {
-            console.error('Error loading store:', error);
-            this.loading = false;
+        const storeId = typeof offer.storeId === 'object' && offer.storeId !== null
+          ? (offer.storeId._id || offer.storeId.id)
+          : offer.storeId;
+
+        if (storeId && typeof storeId === 'string') {
+          this.apiService.getStoreById(storeId).subscribe({
+            next: (store: Store) => {
+              this.store = store;
+              this.loading = false;
+              this.cdr.detectChanges();
+            },
+            error: (error: any) => {
+              console.error('Error loading store:', error);
+              this.loading = false;
+              this.cdr.detectChanges();
+            }
+          });
+        } else {
+          if (typeof offer.storeId === 'object' && offer.storeId !== null) {
+            this.store = offer.storeId as Store;
           }
-        });
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
       },
       error: (error: any) => {
         console.error('Error loading offer:', error);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -112,5 +148,9 @@ export class ProductDetailComponent implements OnInit {
 
   get offerOriginalPrice(): number {
     return this.offer?.originalPrice || this.product?.originalPrice || 0;
+  }
+
+  get offerSavings(): number {
+    return Math.round((this.offerOriginalPrice - this.offerFinalPrice) * 100) / 100;
   }
 }

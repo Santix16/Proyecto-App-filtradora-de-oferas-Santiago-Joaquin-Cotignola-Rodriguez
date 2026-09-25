@@ -52,14 +52,18 @@ export class OffersComponent implements OnInit {
   private async loadData(productId: string) {
     try {
       this.loading = true;
+      console.log('Cargando ofertas para el producto ID:', productId); // Añade esto para depurar en consola
+
       // 1. Cargar Producto
       this.product = await lastValueFrom(this.apiService.getProductById(productId)) || null;
 
-      // 2. Cargar Ofertas y Tiendas en paralelo
+      // 2. Cargar Ofertas pasando explícitamente el productId
       const [allOffers, allStores] = await Promise.all([
-        lastValueFrom(this.apiService.getOffers({ productId, isActive: true })),
+        lastValueFrom(this.apiService.getOffers({ productId: productId, isActive: true })),
         lastValueFrom(this.apiService.getStores())
       ]);
+
+      console.log('Ofertas filtradas recibidas del backend:', allOffers); //Revisa si cambian según el producto
 
       if (allOffers && allStores) {
         this.processOffers(allOffers, allStores);
@@ -71,40 +75,42 @@ export class OffersComponent implements OnInit {
       console.error('Error loading offers:', err);
       this.error = 'Error al cargar las ofertas comparativas';
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
   private processOffers(offers: Offer[], stores: Store[]) {
-    const groups: OffersGroup[] = [];
+  const groups: OffersGroup[] = [];
 
-    // por si acaso el backend devuelve ofertas duplicadas para el mismo producto/tienda,
-    // filtramos para quedarnos sólo con la primera ocurrencia de cada combinación.
-    offers = offers.filter((offer, idx, self) =>
-      self.findIndex(o => o.storeId === offer.storeId /* productId igual siempre */) === idx
-    );
+  offers.forEach(offer => {
+    const storeId = typeof offer.storeId === 'object' && offer.storeId !== null
+      ? (offer.storeId as any)._id || (offer.storeId as any).id
+      : offer.storeId;
 
-    // Agrupar por tienda
-    offers.forEach(offer => {
-      const store = stores.find(s => s.id === offer.storeId);
-      if (!store) return;
+    const store = stores.find((s: any) => s.id === storeId || s._id === storeId);
+    if (!store) return;
 
-      let group = groups.find(g => g.store.id === store.id);
-      if (!group) {
-        group = { store, offers: [], bestScore: 0 };
-        groups.push(group);
-      }
+    // Comprobamos si esta tienda ya tiene un grupo creado
+    let group = groups.find((g: any) => g.store.id === store.id || (g.store as any)._id === (store as any)._id);
+
+    if (!group) {
+      group = { store, offers: [], bestScore: 0 };
+      groups.push(group);
+    }
+
+    // Evitamos duplicar exactamente la misma oferta
+    if (!group.offers.some(o => o.id === offer.id || (o as any)._id === (offer as any)._id)) {
       group.offers.push(offer);
-    });
+    }
+  });
 
-    // Calcular scores y ordenar ofertas internas por precio
-    groups.forEach(group => {
-      group.offers.sort((a, b) => a.finalPrice - b.finalPrice);
-      group.bestScore = this.computeScore(group.store, group.offers[0]);
-    });
+  groups.forEach(group => {
+    group.offers.sort((a, b) => a.finalPrice - b.finalPrice);
+    group.bestScore = this.computeScore(group.store, group.offers[0]);
+  });
 
-    // ORDENAR GRUPOS: Las mejores opciones (mejor score) arriba
-    this.offersByStore = [...groups].sort((a, b) => b.bestScore - a.bestScore);
-  }
+  this.offersByStore = [...groups].sort((a, b) => b.bestScore - a.bestScore);
+}
 
   private computeScore(store: Store, offer: Offer): number {
     const storeRating = store.rating || 3;
@@ -115,7 +121,7 @@ export class OffersComponent implements OnInit {
   }
 
   getSavings(offer: Offer): number {
-    return offer.originalPrice - offer.finalPrice;
+    return Math.round((offer.originalPrice - offer.finalPrice) * 100) / 100;
   }
 
   onOfferClick(offer: Offer) {
@@ -132,14 +138,7 @@ export class OffersComponent implements OnInit {
     if (this.isFavorite(id)) {
       this.favService.remove(id);
     } else {
-      // When adding from the offers page we already have the product and
-      // store information available in this component, so provide the
-      // details to the service.  That allows the personal list to restore
-      // the new item from cache on the very first visit instead of needing
-      // a second load.
       if (this.product) {
-        // try to locate the store object for this offer; it should exist in
-        // the current grouping.
         const storeObj = this.offersByStore.find(g => g.store.id === offer.storeId)
           ?.store as Store | undefined;
         if (!storeObj) {

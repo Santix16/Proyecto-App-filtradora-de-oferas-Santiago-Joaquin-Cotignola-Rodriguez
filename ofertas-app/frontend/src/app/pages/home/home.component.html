@@ -1,7 +1,7 @@
 <div class="home-container">
   <header class="app-header">
     <div class="header-content">
-      <h1 class="app-title">🛒 Ofertas App</h1>
+      <h1 class="app-title">Ofertas App</h1>
       <p class="app-subtitle">Tu portal inteligente para ahorrar en la compra diaria.</p>
     </div>
   </header>
@@ -10,7 +10,7 @@
     <app-search-bar (search)="onSearch($event)"></app-search-bar>
 
     <div *ngIf="error" class="error-banner">
-      <span>⚠️ {{ error }}</span>
+      <span>{{ error }}</span>
     </div>
 
     <div *ngIf="loading" class="loading-state">
@@ -21,7 +21,7 @@
     <div *ngIf="!loading">
       <section class="section">
         <div class="section-header">
-          <h2>{{ searchActive ? '🔍 Resultados de búsqueda' : '📦 Todas las Categorías' }}</h2>
+          <h2>{{ searchActive ? 'Resultados de búsqueda' : 'Todas las Categorías' }}</h2>
           <p class="section-meta">Selecciona una sección para ver los productos en oferta.</p>
         </div>
 
@@ -44,7 +44,7 @@
         </div>
 
         <div class="no-results" *ngIf="filteredCategories.length === 0">
-          <div class="no-results-icon">🙊</div>
+          <div class="no-results-icon"></div>
           <h3>No encontramos esa categoría</h3>
           <p>Prueba con términos más generales como "Bebidas" o "Carnes".</p>
         </div>

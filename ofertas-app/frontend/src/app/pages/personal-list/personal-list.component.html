@@ -12,7 +12,7 @@
   </div>
 
   <div *ngIf="error" class="error-banner">
-    <span>⚠️ {{ error }}</span>
+    <span>{{ error }}</span>
   </div>
 
   <div *ngIf="!loading && offersWithDetails.length > 0" class="offers-grid">

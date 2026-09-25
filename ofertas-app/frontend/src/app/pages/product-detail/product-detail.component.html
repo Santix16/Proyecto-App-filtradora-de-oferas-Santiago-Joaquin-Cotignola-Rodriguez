@@ -1,13 +1,15 @@
-<div class="product-detail-container" *ngIf="product && !loading">
-  <!-- Loading -->
-  <div *ngIf="loading" class="loading">
-    <p>Cargando detalles del producto...</p>
-  </div>
+<!-- 1. Pantalla de Carga (Independiente del producto) -->
+<div *ngIf="loading" class="loading">
+  <p>Cargando detalles del producto...</p>
+</div>
 
-  <!-- Error -->
-  <div *ngIf="error" class="error-message">
-    {{ error }}
-  </div>
+<!-- 2. Pantalla de Error (Si ocurre algún problema) -->
+<div *ngIf="error && !loading" class="error-message">
+  <p>{{ error }}</p>
+</div>
+
+<!-- 3. Contenedor Principal (Solo se muestra cuando ya terminó de cargar y hay producto) -->
+<div class="product-detail-container" *ngIf="product && !loading">
 
   <!-- Product Image -->
   <div class="product-image">
@@ -23,19 +25,19 @@
 
     <!-- Store Info -->
     <div class="store-section" *ngIf="store">
-      <h3>📍 Disponible en:</h3>
+      <h3>Disponible en:</h3>
       <div class="store-details">
         <p class="store-name">{{ store.name }}</p>
         <p class="store-address">{{ store.address }}, {{ store.city }}</p>
-        <p class="store-phone">📞 {{ store.phone }}</p>
+        <p class="store-phone">{{ store.phone }}</p>
         <div class="store-rating">
-          <span>⭐ {{ store.rating }}/5</span>
+          <span>{{ store.rating }}/5</span>
           <span>({{ store.reviews }} reseñas)</span>
         </div>
       </div>
     </div>
 
-    <p class="category">📂 Categoría: {{ product.category }}</p>
+    <p class="category">Categoría: {{ product.category }}</p>
 
     <!-- Price Info -->
     <div class="price-info">
@@ -43,7 +45,7 @@
         <span class="original-price">€{{ offerOriginalPrice }}</span>
         <span class="current-price">€{{ offerFinalPrice }}</span>
         <div class="savings">
-          ¡Ahorras €{{ offerOriginalPrice - offerFinalPrice }}!
+          ¡Ahorras €{{ offerSavings }}!
         </div>
       </div>
       <div *ngIf="!offer" class="regular-price">
@@ -53,11 +55,11 @@
 
     <!-- Offer Details -->
     <div *ngIf="offer" class="offer-details">
-      <h3>🔥 Detalles de la Oferta</h3>
+      <h3>Detalles de la Oferta</h3>
       <p class="offer-description">{{ offer.description }}</p>
       <div class="offer-dates">
-        <p>📅 Válida desde: {{ offer.startDate | date:'dd/MM/yyyy' }}</p>
-        <p>⏰ Hasta: {{ offer.endDate | date:'dd/MM/yyyy' }}</p>
+        <p>Válida desde: {{ offer.startDate | date:'dd/MM/yyyy' }}</p>
+        <p>Hasta: {{ offer.endDate | date:'dd/MM/yyyy' }}</p>
       </div>
     </div>
 
@@ -70,7 +72,7 @@
 
     <!-- Product Rating -->
     <div *ngIf="product.rating" class="rating">
-      <span class="stars">⭐ {{ product.rating }}/5</span>
+      <span class="stars"> {{ product.rating }}/5</span>
       <span class="reviews">({{ product.reviews }} reseñas)</span>
     </div>
 
@@ -80,6 +82,7 @@
   </div>
 </div>
 
-<div *ngIf="!product && !loading" class="no-product">
+<!-- 4. Si terminó de cargar, no hay error, pero no existe el producto -->
+<div *ngIf="!product && !loading && !error" class="no-product">
   <p>Producto no encontrado</p>
 </div>

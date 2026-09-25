@@ -21,10 +21,6 @@ interface OfferWithDetails {
 })
 export class OfferCardComponent implements OnInit {
   @Input() offerDetails!: OfferWithDetails;
-  // We no longer keep a cached copy of the favorite state; instead we
-  // compute it on demand so the button is always in sync with the service.
-  // That also ensures changes to the input or the underlying list are
-  // reflected automatically.
   get favorite(): boolean {
     return this.offerDetails ? this.fav.isFavorite(this.offerDetails.offer.id) : false;
   }
@@ -32,7 +28,6 @@ export class OfferCardComponent implements OnInit {
   constructor(private readonly router: Router, private readonly fav: FavoritesService) {}
 
   ngOnInit() {
-    // nothing to do here any more; computed property handles initial state
   }
 
   toggleFavorite(event: Event) {
@@ -43,12 +38,16 @@ export class OfferCardComponent implements OnInit {
     } else {
       this.fav.addWithDetails(id, this.offerDetails);
     }
-    // no need to flip a local flag; the getter will reflect the new state
   }
 
   onCardClick() {
-    // Navegar al detalle del producto con la oferta
-    this.router.navigate(['/product', this.offerDetails.product.id], {
+    const productId = this.offerDetails?.product?.id;
+    if (!productId) {
+
+      console.warn('OfferCardComponent: producto sin id válido, no se puede abrir el detalle', this.offerDetails);
+      return;
+    }
+    this.router.navigate(['/product', productId], {
       queryParams: { offerId: this.offerDetails.offer.id }
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
@@ -24,7 +24,8 @@ export class OfferDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +51,7 @@ export class OfferDetailComponent implements OnInit {
         console.error('Error loading offer:', error);
         this.error = 'Oferta no encontrada';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -64,31 +66,32 @@ export class OfferDetailComponent implements OnInit {
           next: (store: Store) => {
             this.store = store;
             this.loading = false;
+            this.cdr.detectChanges();
           },
           error: (error: any) => {
             console.error('Error loading store:', error);
+            this.error = 'No se pudo cargar la tienda';
             this.loading = false;
+            this.cdr.detectChanges();
           }
         });
       },
       error: (error: any) => {
         console.error('Error loading product:', error);
+        this.error = 'No se pudo cargar el producto';
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   goBack() {
-    if (this.product) {
-      this.router.navigate(['/offers', this.product.id]);
-    } else {
-      this.router.navigate(['/home']);
-    }
+    globalThis.history.back();
   }
 
   getSavings(): number {
     if (this.offer) {
-      return this.offer.originalPrice - this.offer.finalPrice;
+      return Math.round((this.offer.originalPrice - this.offer.finalPrice) * 100) / 100;
     }
     return 0;
   }

@@ -71,12 +71,6 @@ export class PersonalListComponent implements OnInit, OnDestroy {
         this.loadFavorites(favIds);
       });
 
-    // No need to call `loadFavorites()` manually; subscribing to a
-    // BehaviorSubject immediately invokes the callback with the current
-    // value.  The extra invocation previously could race with the
-    // subscription and occasionally overwrite a valid list with an error-
-    // driven empty state.
-
   }
 
   ngOnDestroy(): void {
@@ -90,10 +84,6 @@ export class PersonalListComponent implements OnInit, OnDestroy {
   }
 
   private loadFavorites(favIds?: string[]) {
-    // always show the spinner while we rebuild the list.  previously we
-    // only set loading=true when the array was empty, which could leave the
-    // old items visible until the network request finished.  not a huge
-    // deal but might confuse users who feel they need to reopen the page.
     this.loading = true;
     this.cdr.detectChanges();
 
@@ -103,6 +93,7 @@ export class PersonalListComponent implements OnInit, OnDestroy {
     if (!ids || ids.length === 0) {
       this.offersWithDetails = [];
       this.loading = false;
+      this.cdr.detectChanges();
       return;
     }
 
@@ -149,7 +140,6 @@ export class PersonalListComponent implements OnInit, OnDestroy {
 
       console.log('PersonalListComponent: finished, result length', result.length);
       this.loading = false;
-      // ensure the DOM reflects our updated array right away
       this.cdr.detectChanges();
 
     } catch (err) {
